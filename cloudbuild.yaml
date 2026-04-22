@@ -1,0 +1,66 @@
+# Cloud Build pipeline — builds the Docker image and deploys to Cloud Run
+# Trigger this manually or connect to a GitHub push trigger in Cloud Build.
+#
+# Required GCP setup (run once):
+#   gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com
+#   gcloud artifacts repositories create plainpolitics \
+#     --repository-format=docker --location=us-central1
+#   gcloud secrets create MONGO_URI --data-file=- <<< "your-mongo-uri"
+
+substitutions:
+  _REGION: us-central1
+  _SERVICE: plainpolitics
+  _REPO: plainpolitics
+  _PROJECT: ${PROJECT_ID}
+
+steps:
+  # ── Build the Docker image ───────────────────────────────────────────────
+  - name: "gcr.io/cloud-builders/docker"
+    id: build
+    args:
+      - build
+      - "-t"
+      - "${_REGION}-docker.pkg.dev/${_PROJECT}/${_REPO}/${_SERVICE}:${SHORT_SHA}"
+      - "-t"
+      - "${_REGION}-docker.pkg.dev/${_PROJECT}/${_REPO}/${_SERVICE}:latest"
+      - "."
+
+  # ── Push to Artifact Registry ────────────────────────────────────────────
+  - name: "gcr.io/cloud-builders/docker"
+    id: push
+    args:
+      - push
+      - "--all-tags"
+      - "${_REGION}-docker.pkg.dev/${_PROJECT}/${_REPO}/${_SERVICE}"
+    waitFor: [build]
+
+  # ── Deploy to Cloud Run ──────────────────────────────────────────────────
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    id: deploy
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - "${_SERVICE}"
+      - "--image=${_REGION}-docker.pkg.dev/${_PROJECT}/${_REPO}/${_SERVICE}:${SHORT_SHA}"
+      - "--region=${_REGION}"
+      - "--platform=managed"
+      - "--allow-unauthenticated"
+      - "--port=8080"
+      - "--memory=512Mi"
+      - "--cpu=1"
+      - "--min-instances=0"
+      - "--max-instances=5"
+      # Vertex AI — uses the Cloud Run service account (no API key needed)
+      - "--set-env-vars=NODE_ENV=production,GOOGLE_CLOUD_PROJECT=${_PROJECT},GOOGLE_CLOUD_LOCATION=${_REGION}"
+      # MongoDB URI from Secret Manager
+      - "--set-secrets=MONGO_URI=MONGO_URI:latest"
+    waitFor: [push]
+
+images:
+  - "${_REGION}-docker.pkg.dev/${_PROJECT}/${_REPO}/${_SERVICE}:${SHORT_SHA}"
+  - "${_REGION}-docker.pkg.dev/${_PROJECT}/${_REPO}/${_SERVICE}:latest"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_MEDIUM

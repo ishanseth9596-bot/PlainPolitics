@@ -4,11 +4,16 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import path from "path";
 
 import informerRoutes from "./routes/informer.js";
 import reporterRoutes from "./routes/reporter.js";
 import trackerRoutes from "./routes/tracker.js";
 import aiRoutes from "./routes/ai.js";
+
+// __dirname equivalent for ESM
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 dotenv.config();
 
@@ -18,13 +23,17 @@ const PORT = process.env.PORT || 5000;
 // ── Security middleware ────────────────────────────────────────────────────────
 app.use(helmet());
 
-app.use(
-  cors({
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
-    methods: ["GET", "POST", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+// In production (Cloud Run) the React build is served from the same origin,
+// so CORS is only needed for local development.
+if (process.env.NODE_ENV !== "production") {
+  app.use(
+    cors({
+      origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+      methods: ["GET", "POST", "PATCH", "DELETE"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  );
+}
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -48,8 +57,16 @@ app.use("/api/reporter", reporterRoutes);
 app.use("/api/tracker", trackerRoutes);
 app.use("/api/ai", aiRoutes);
 
-// ── 404 handler ───────────────────────────────────────────────────────────────
-app.use((_req, res) => res.status(404).json({ error: "Route not found." }));
+// ── Serve React build (production / Cloud Run) ───────────────────────────────
+const clientBuild = path.join(__dirname, "../client/dist");
+app.use(express.static(clientBuild));
+// React Router catch-all — must come AFTER all API routes
+app.get("*", (_req, res) =>
+  res.sendFile(path.join(clientBuild, "index.html"), (err) => {
+    // Fall back to JSON 404 if no build exists (local dev)
+    if (err) res.status(404).json({ error: "Route not found." });
+  })
+);
 
 // ── Global error handler ──────────────────────────────────────────────────────
 // eslint-disable-next-line no-unused-vars

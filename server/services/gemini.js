@@ -1,20 +1,35 @@
+import { VertexAI } from "@google-cloud/vertexai";
 import fetch from "node-fetch";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL =
+// ── Choose backend: Vertex AI (Cloud Run) or REST API key (local dev) ──────
+const useVertexAI =
+  Boolean(process.env.GOOGLE_CLOUD_PROJECT) &&
+  !process.env.GEMINI_API_KEY;
+
+// ── Vertex AI client (Application Default Credentials via service account) ──
+let generativeModel;
+
+if (useVertexAI) {
+  const vertexAI = new VertexAI({
+    project: process.env.GOOGLE_CLOUD_PROJECT,
+    location: process.env.GOOGLE_CLOUD_LOCATION || "us-central1",
+  });
+  generativeModel = vertexAI.getGenerativeModel({
+    model: "gemini-2.0-flash-001",
+    generationConfig: {
+      temperature: 0.4,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 1024,
+    },
+  });
+}
+
+// ── Gemini REST (local dev with API key) ────────────────────────────────────
+const GEMINI_REST_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
-/**
- * Send a prompt to Gemini and return the text response.
- * @param {string} prompt
- * @param {string} systemInstruction - Optional grounding instruction
- * @returns {Promise<string>}
- */
-export const askGemini = async (prompt, systemInstruction = "") => {
-  if (!GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured.");
-  }
-
+async function callGeminiRest(prompt, systemInstruction) {
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: {
@@ -24,99 +39,98 @@ export const askGemini = async (prompt, systemInstruction = "") => {
       maxOutputTokens: 1024,
     },
   };
-
   if (systemInstruction) {
     body.system_instruction = { parts: [{ text: systemInstruction }] };
   }
 
-  const response = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Gemini API error ${response.status}: ${errText}`);
-  }
-
-  const data = await response.json();
+  const res = await fetch(
+    `${GEMINI_REST_URL}?key=${process.env.GEMINI_API_KEY}`,
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }
+  );
+  if (!res.ok) throw new Error(`Gemini REST error ${res.status}: ${await res.text()}`);
+  const data = await res.json();
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "No response.";
+}
+
+// ── Vertex AI call ──────────────────────────────────────────────────────────
+async function callVertexAI(prompt, systemInstruction) {
+  const request = {
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+  };
+  if (systemInstruction) {
+    request.systemInstruction = { parts: [{ text: systemInstruction }] };
+  }
+  const result = await generativeModel.generateContent(request);
+  const response = await result.response;
+  return response.candidates?.[0]?.content?.parts?.[0]?.text ?? "No response.";
+}
+
+// ── Public API ──────────────────────────────────────────────────────────────
+/**
+ * Send a prompt to Gemini and return the text response.
+ * Automatically uses Vertex AI on Cloud Run, REST API key locally.
+ */
+export const askGemini = async (prompt, systemInstruction = "") => {
+  if (useVertexAI) {
+    return callVertexAI(prompt, systemInstruction);
+  }
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("Set GEMINI_API_KEY (local) or GOOGLE_CLOUD_PROJECT (Cloud Run).");
+  }
+  return callGeminiRest(prompt, systemInstruction);
 };
 
-/**
- * Summarise a candidate manifesto into bullet points.
- * @param {object} candidate
- */
+/** Summarise a candidate manifesto into bullet points. */
 export const summariseManifesto = (candidate) => {
   const promises = candidate.manifesto
     .map((p) => `- [${p.category}] ${p.promise}: ${p.detail}`)
     .join("\n");
 
-  const prompt = `
+  return askGemini(`
 You are a non-partisan civic assistant. Summarise the following election manifesto in simple, jargon-free English for a first-time voter.
-Format your output as a short paragraph followed by 5 clear bullet points.
+Format: short paragraph followed by 5 clear bullet points.
 
 Candidate: ${candidate.name} (${candidate.party})
 Manifesto:
 ${promises}
-`;
-  return askGemini(prompt);
+`);
 };
 
-/**
- * Fact-check a claim using Gemini's knowledge.
- * @param {string} claim
- */
-export const factCheck = (claim) => {
-  const prompt = `
+/** Fact-check a claim using Gemini. */
+export const factCheck = (claim) =>
+  askGemini(`
 You are a fact-checking assistant. A voter is asking whether the following claim about an election is true or false.
-Answer with: VERDICT: TRUE / FALSE / UNVERIFIED, then 2–3 sentences explaining why. Stay strictly factual.
+Answer with: VERDICT: TRUE / FALSE / UNVERIFIED, then 2-3 sentences explaining why. Stay strictly factual.
 
 Claim: "${claim}"
-`;
-  return askGemini(prompt);
-};
+`);
 
-/**
- * Generate contextual SOS guidance based on incident type.
- * @param {"stolen_vote"|"machine_breakdown"|"intimidation"} type
- */
+/** Generate contextual SOS guidance. */
 export const getSosGuidance = (type) => {
   const guides = {
-    stolen_vote: `
-Explain to a panicking voter that their vote may have been fraudulently cast. Give them 3 clear, numbered steps:
-1. Ask for a Tendered Ballot (a paper backup vote).
+    stolen_vote: `Explain to a panicking voter that their vote may have been fraudulently cast. Give them 3 clear, numbered steps:
+1. Ask for a Tendered Ballot.
 2. Who to speak to at the booth.
 3. How to file a formal complaint afterward.
 Keep it calm and under 100 words.`,
-    machine_breakdown: `
-Explain to a voter that the voting machine is broken. Give them 3 numbered steps:
+    machine_breakdown: `Explain to a voter the voting machine is broken. Give them 3 numbered steps:
 1. Alert the Presiding Officer.
 2. Wait for the backup process.
 3. Their rights during the wait.
 Keep it calm and under 100 words.`,
-    intimidation: `
-Explain to a voter that they are being intimidated at a polling booth. Give them 3 numbered steps:
+    intimidation: `Explain to a voter they are being intimidated at a polling booth. Give them 3 numbered steps:
 1. Stay calm and do not engage.
-2. Find a Neutral Observer or Election Observer inside.
+2. Find a Neutral Observer inside.
 3. Log the incident with GPS and report it.
 Keep it calm and under 100 words.`,
   };
-
-  const prompt = guides[type] || "Provide general election day guidance.";
-  return askGemini(prompt);
+  return askGemini(guides[type] || "Provide general election day guidance.");
 };
 
-/**
- * Generate de-polarisation advice.
- * @param {string} concern - User's specific concern
- */
-export const getDepolarisationAdvice = (concern) => {
-  const prompt = `
+/** Generate de-polarisation advice. */
+export const getDepolarisationAdvice = (concern) =>
+  askGemini(`
 You are a community peacebuilding advisor. A voter says: "${concern}".
 Give them 3 short, actionable tips to rebuild community relationships after a divisive election.
 Focus on shared local goals, not national politics. Keep it warm and under 150 words.
-`;
-  return askGemini(prompt);
-};
+`);

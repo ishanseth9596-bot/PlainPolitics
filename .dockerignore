@@ -1,0 +1,21 @@
+# Ignore everything, then whitelist only what the build needs
+**
+
+# Allow server source
+!server/
+!server/**
+
+# Allow client source
+!client/
+!client/**
+
+# Block generated/dev artifacts that must not enter the image
+client/node_modules/
+server/node_modules/
+client/dist/
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+.git/
+.gitignore
