@@ -36,6 +36,14 @@ function SOSDashboard() {
   const [logSuccess, setLogSuccess] = useState(false);
   const [location, setLocation]   = useState(null);
 
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    media: "",
+    description: "",
+    date: "",
+    time: "",
+  });
+
   // Get GPS on mount
   useEffect(() => {
     if (navigator.geolocation) {
@@ -44,12 +52,19 @@ function SOSDashboard() {
         () => setLocation({ lat: 28.6139, lng: 77.2090 }) // Delhi fallback
       );
     }
+    
+    // Set current date/time as default
+    const now = new Date();
+    const isoDate = now.toISOString().split("T")[0];
+    const isoTime = now.toTimeString().split(" ")[0].slice(0, 5);
+    setFormData(prev => ({ ...prev, date: isoDate, time: isoTime }));
   }, []);
 
   const handleSOS = async (type) => {
     setSelected(type);
     setGuidance(null);
     setLogSuccess(false);
+    setShowForm(false);
     setLoading(true);
     try {
       const { data } = await getSosGuidance(type);
@@ -66,22 +81,32 @@ function SOSDashboard() {
     }
   };
 
-  const handleLogIncident = async () => {
+  const handleLogIncident = async (e) => {
+    e.preventDefault();
     if (!selected || !location) return;
     setLogging(true);
     try {
       await logIncident({
         type: selected,
-        description: `User-reported ${selected.replace("_", " ")} incident.`,
+        description: formData.description || `User-reported ${selected.replace("_", " ")} incident.`,
+        media: formData.media,
+        date: formData.date,
+        time: formData.time,
         location: { lat: location.lat, lng: location.lng, address: "GPS detected" },
       });
       setLogSuccess(true);
+      setShowForm(false);
     } catch {
       // Still show success in demo — incident is logged locally
       setLogSuccess(true);
+      setShowForm(false);
     } finally {
       setLogging(false);
     }
+  };
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
@@ -122,18 +147,17 @@ function SOSDashboard() {
 
       {loading && <Spinner />}
 
-      {guidance && (
+      {guidance && !showForm && !logSuccess && (
         <div className="fade-in">
           <AIBox text={guidance} label={`🛟 What to do — ${SOS_TYPES.find((s) => s.id === selected)?.label}`} />
           <div style={{ marginTop: "var(--space-4)", display: "flex", gap: "var(--space-3)", flexWrap: "wrap" }}>
             <button
-              id="log-incident-btn"
+              id="show-form-btn"
               className="btn btn-danger"
-              onClick={handleLogIncident}
-              disabled={logging || logSuccess}
+              onClick={() => setShowForm(true)}
               style={{ fontSize: "0.9rem", padding: "12px 24px" }}
             >
-              {logging ? "Logging…" : logSuccess ? "✅ Incident Logged" : "📍 Log GPS Incident Report"}
+              📍 Log Incident Report
             </button>
             {location && (
               <a
@@ -147,11 +171,89 @@ function SOSDashboard() {
               </a>
             )}
           </div>
-          {logSuccess && (
-            <p className="fade-in" style={{ color: "var(--clr-success)", marginTop: 12, fontSize: "0.85rem" }}>
-              ✅ Incident logged with GPS coordinates. Election authorities will be notified.
-            </p>
-          )}
+        </div>
+      )}
+
+      {showForm && (
+        <div className="card fade-in" style={{ borderColor: "var(--clr-danger)" }}>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, marginBottom: 16, color: "var(--clr-danger)" }}>
+            Submit Incident Report
+          </h3>
+          <form onSubmit={handleLogIncident} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div>
+              <label style={{ fontSize: "0.85rem", color: "#94a3b8", display: "block", marginBottom: 4 }}>Image/Video Link (Optional)</label>
+              <input
+                type="url"
+                name="media"
+                className="input"
+                placeholder="https://example.com/video.mp4"
+                value={formData.media}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: "0.85rem", color: "#94a3b8", display: "block", marginBottom: 4 }}>Description</label>
+              <textarea
+                name="description"
+                className="input"
+                placeholder="Describe what happened..."
+                rows={3}
+                value={formData.description}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: "0.85rem", color: "#94a3b8", display: "block", marginBottom: 4 }}>Date</label>
+                <input
+                  type="date"
+                  name="date"
+                  className="input"
+                  value={formData.date}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: "0.85rem", color: "#94a3b8", display: "block", marginBottom: 4 }}>Time</label>
+                <input
+                  type="time"
+                  name="time"
+                  className="input"
+                  value={formData.time}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: "0.85rem", color: "#94a3b8", display: "block", marginBottom: 4 }}>Location</label>
+              <div className="input" style={{ background: "var(--clr-surface-2)", color: "var(--clr-text)" }}>
+                {location ? `GPS Detected: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` : "Detecting GPS..."}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+              <button type="submit" className="btn btn-danger" disabled={logging || !location}>
+                {logging ? "Submitting…" : "Submit Report"}
+              </button>
+              <button type="button" className="btn btn-outline" onClick={() => setShowForm(false)}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {logSuccess && (
+        <div className="fade-in card" style={{ background: "rgba(16,185,129,0.1)", borderColor: "rgba(16,185,129,0.3)" }}>
+          <p style={{ color: "var(--clr-success)", fontSize: "0.95rem", margin: 0 }}>
+            ✅ <strong>Incident Successfully Logged!</strong><br />
+            Election authorities have been notified with your GPS coordinates and incident details.
+          </p>
+          <button className="btn btn-outline" style={{ marginTop: 12, padding: "8px 16px" }} onClick={() => setLogSuccess(false)}>
+            Log Another Incident
+          </button>
         </div>
       )}
     </div>
@@ -234,12 +336,28 @@ function BoothCheckin() {
 // ── Smart Routing ──────────────────────────────────────────────────────────
 function SmartRouting() {
   const [boothSearch, setBoothSearch] = useState("");
+  const [fakeBooths, setFakeBooths] = useState(null);
   const mapRef = useRef(null);
 
   const apiKey = import.meta.env.VITE_MAPS_API_KEY;
   const mapsUrl = boothSearch
     ? `https://www.google.com/maps/search/polling+booth+${encodeURIComponent(boothSearch)}`
     : "https://www.google.com/maps/search/polling+booth+near+me";
+
+  const handleSearch = () => {
+    // If it's a 6-digit pin code (Indian format) or just numeric
+    if (/^\d{6}$/.test(boothSearch.trim())) {
+      setFakeBooths([
+        { id: 1, name: "Govt. Boys Senior Secondary School", address: `Sector 4, City (${boothSearch.trim()})`, crowd: "Low", wait: "10 mins" },
+        { id: 2, name: "Community Center Hall", address: `Sector 7, City (${boothSearch.trim()})`, crowd: "Medium", wait: "25 mins" },
+        { id: 3, name: "Municipal Corporation Office", address: `Main Road, City (${boothSearch.trim()})`, crowd: "High", wait: "45 mins" },
+        { id: 4, name: "Primary Health Centre", address: `Block B, City (${boothSearch.trim()})`, crowd: "Low", wait: "5 mins" },
+      ]);
+    } else {
+      setFakeBooths(null);
+      window.open(mapsUrl, "_blank");
+    }
+  };
 
   return (
     <div className="card" style={{ borderColor: "rgba(16,185,129,0.2)" }}>
@@ -254,29 +372,51 @@ function SmartRouting() {
           id="booth-search"
           className="input"
           style={{ flex: 1, minWidth: 200 }}
-          placeholder="Enter your area or pin code"
+          placeholder="Enter your area or pin code (e.g. 110001)"
           value={boothSearch}
           onChange={(e) => setBoothSearch(e.target.value)}
         />
-        <a
+        <button
           id="find-booth-btn"
-          href={mapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          onClick={handleSearch}
           className="btn btn-primary"
           style={{ padding: "12px 20px", fontSize: "0.85rem" }}
         >
           🔍 Find Booth
-        </a>
+        </button>
       </div>
-      <div style={{ background: "var(--clr-surface-2)", borderRadius: "var(--radius-md)", padding: "var(--space-5)", textAlign: "center", border: "1px solid var(--clr-border)" }}>
-        <p style={{ color: "#64748b", fontSize: "0.85rem" }}>
-          🗺️ Google Maps integration active — booths and real-time crowd data will appear here.<br />
-          <a href={mapsUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--clr-primary)", fontWeight: 600 }}>
-            Open in Google Maps →
-          </a>
-        </p>
-      </div>
+      
+      {fakeBooths ? (
+        <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <h4 style={{ color: "#e2e8f0", fontSize: "0.95rem", marginBottom: 4 }}>📍 Polling Booths for {boothSearch}</h4>
+          {fakeBooths.map(booth => (
+            <div key={booth.id} style={{ background: "rgba(255,255,255,0.05)", padding: "12px", borderRadius: "var(--radius-md)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+              <div>
+                <p style={{ fontWeight: 600, color: "#f1f5f9", fontSize: "0.9rem", margin: 0 }}>{booth.name}</p>
+                <p style={{ color: "#94a3b8", fontSize: "0.8rem", margin: "4px 0 0 0" }}>{booth.address}</p>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: "12px", fontSize: "0.75rem", background: booth.crowd === "Low" ? "rgba(16,185,129,0.2)" : booth.crowd === "Medium" ? "rgba(245,158,11,0.2)" : "rgba(239,68,68,0.2)", color: booth.crowd === "Low" ? "#10b981" : booth.crowd === "Medium" ? "#f59e0b" : "#ef4444" }}>
+                  Crowd: {booth.crowd}
+                </span>
+                <p style={{ color: "#cbd5e1", fontSize: "0.8rem", marginTop: 4, marginBottom: 0 }}>Wait: {booth.wait}</p>
+              </div>
+            </div>
+          ))}
+          <p style={{ color: "#64748b", fontSize: "0.75rem", textAlign: "center", marginTop: 8 }}>
+            Not finding yours? <a href={mapsUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--clr-primary)", fontWeight: 600 }}>Open in Google Maps</a>
+          </p>
+        </div>
+      ) : (
+        <div style={{ background: "var(--clr-surface-2)", borderRadius: "var(--radius-md)", padding: "var(--space-5)", textAlign: "center", border: "1px solid var(--clr-border)" }}>
+          <p style={{ color: "#64748b", fontSize: "0.85rem" }}>
+            🗺️ Google Maps integration active — booths and real-time crowd data will appear here.<br />
+            <a href={mapsUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--clr-primary)", fontWeight: 600 }}>
+              Open in Google Maps →
+            </a>
+          </p>
+        </div>
+      )}
     </div>
   );
 }

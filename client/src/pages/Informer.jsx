@@ -2,6 +2,7 @@ import { useState } from "react";
 import { factCheck, summariseManifesto } from "../services/api";
 import Spinner from "../components/Spinner";
 import AIBox from "../components/AIBox";
+import VoterRegistrationHub from "../components/VoterRegistrationHub";
 
 // ── Mock candidates (used when DB is not connected) ────────────────────────
 const DEMO_CANDIDATES = [
@@ -38,11 +39,26 @@ const DEMO_CANDIDATES = [
 // ── Registration Checker ───────────────────────────────────────────────────
 function RegistrationChecker() {
   const [name, setName] = useState("");
-  const [checked, setChecked] = useState(false);
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleCheck = (e) => {
     e.preventDefault();
-    if (name.trim()) setChecked(true);
+    if (!name.trim()) return;
+    setLoading(true);
+    setStatus(null);
+    
+    // Simulate a network request to check registration
+    setTimeout(() => {
+      // Mock logic: If the name length is even, they are registered, else they are not.
+      // This gives the user dynamic feedback without needing a real backend DB connection for the demo.
+      if (name.trim().length % 2 === 0) {
+        setStatus("found");
+      } else {
+        setStatus("not_found");
+      }
+      setLoading(false);
+    }, 800);
   };
 
   return (
@@ -58,32 +74,75 @@ function RegistrationChecker() {
           id="reg-name"
           className="input"
           style={{ flex: 1, minWidth: 200 }}
-          placeholder="Enter your full name"
+          placeholder="Enter your EPIC Number (Voter ID)"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
         />
-        <button id="reg-check-btn" type="submit" className="btn btn-primary" style={{ padding: "12px 20px" }}>
-          Check Status
+        <button id="reg-check-btn" type="submit" className="btn btn-primary" style={{ padding: "12px 20px" }} disabled={loading}>
+          {loading ? "Checking..." : "Check Status"}
         </button>
       </form>
-      {checked && (
+      
+      {status === "found" && (
         <div className="fade-in" style={{ marginTop: "var(--space-4)", padding: "var(--space-4)", background: "rgba(16,185,129,0.1)", borderRadius: "var(--radius-md)", border: "1px solid rgba(16,185,129,0.3)" }}>
-          <p style={{ color: "#10b981", fontWeight: 600 }}>✅ Registration Found</p>
+          <p style={{ color: "#10b981", fontWeight: 600 }}>✅ Registration Found (पंजीकरण मिल गया)</p>
           <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginTop: 4 }}>
-            Name: <strong style={{ color: "#e2e8f0" }}>{name}</strong><br />
-            Status: <strong style={{ color: "#10b981" }}>Active Voter</strong><br />
+            EPIC No: <strong style={{ color: "#e2e8f0" }}>{name}</strong><br />
+            Status: <strong style={{ color: "#10b981" }}>Active Voter (सक्रिय मतदाता)</strong><br />
             📸 <strong>Tip:</strong> Screenshot this page to prove your status at the polling booth.
           </p>
+          <div style={{ display: "flex", gap: "8px", marginTop: 12, flexWrap: "wrap" }}>
+            <a
+              href="https://electoralsearch.eci.gov.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              id="eci-link"
+              className="btn btn-outline"
+              style={{ fontSize: "0.85rem", padding: "8px 16px" }}
+            >
+              🔗 Verify on Official ECI Portal
+            </a>
+            <a
+              href="https://electoralsearch.eci.gov.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline"
+              style={{ fontSize: "0.85rem", padding: "8px 16px" }}
+            >
+              🔗 आधिकारिक ECI पोर्टल पर सत्यापित करें
+            </a>
+          </div>
+        </div>
+      )}
+
+      {status === "not_found" && (
+        <div className="fade-in" style={{ marginTop: "var(--space-4)", padding: "var(--space-4)", background: "rgba(239,68,68,0.1)", borderRadius: "var(--radius-md)", border: "1px solid rgba(239,68,68,0.3)" }}>
+          <p style={{ color: "#ef4444", fontWeight: 600 }}>❌ Registration Not Found (पंजीकरण नहीं मिला)</p>
+          <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginTop: 4 }}>
+            We couldn't find a registration matching the EPIC number <strong style={{ color: "#e2e8f0" }}>{name}</strong>.<br />
+            Please double-check the spelling or verify directly on the official portal.
+          </p>
+          
+          <div style={{ marginTop: "16px", background: "rgba(0,0,0,0.2)", padding: "12px", borderRadius: "var(--radius-sm)" }}>
+            <p style={{ color: "#fca5a5", fontSize: "0.85rem", fontWeight: 700, marginBottom: "8px" }}>Why might this happen? (Your vote is not ready if:)</p>
+            <ul style={{ color: "#e2e8f0", fontSize: "0.8rem", marginLeft: "20px", lineHeight: 1.6 }}>
+              <li><strong>Typo in EPIC Number:</strong> Double-check the exact alphanumeric code on your Voter ID card.</li>
+              <li><strong>Not Registered Yet:</strong> Having an Aadhaar or PAN does not mean you can vote. You must apply for a Voter ID (Form 6).</li>
+              <li><strong>Name Deleted:</strong> Your name may have been struck off during recent electoral roll revisions.</li>
+              <li><strong>Shifted Residence:</strong> You may be registered in a different constituency if you recently moved.</li>
+            </ul>
+          </div>
+
           <a
             href="https://electoralsearch.eci.gov.in/"
             target="_blank"
             rel="noopener noreferrer"
-            id="eci-link"
+            id="eci-link-not-found"
             className="btn btn-outline"
-            style={{ marginTop: 12, fontSize: "0.85rem", padding: "8px 16px" }}
+            style={{ marginTop: 16, fontSize: "0.85rem", padding: "8px 16px", display: "inline-block" }}
           >
-            🔗 Verify on Official ECI Portal
+            🔗 Search officially by EPIC No.
           </a>
         </div>
       )}
@@ -301,12 +360,95 @@ function CivicQA() {
   );
 }
 
+// ── Voting Guide ───────────────────────────────────────────────────────────
+function VotingGuide() {
+  const steps = [
+    {
+      title: "Step 1: Identity Verification",
+      icon: "🪪",
+      desc: "Approach the first polling officer at the entrance. Present your identity proof (Voter ID/EPIC card or other approved documents). The officer will verify your name against the official electoral roll."
+    },
+    {
+      title: "Step 2: Finger Marking & Signing",
+      icon: "👆",
+      desc: "The second officer will apply indelible ink on your left forefinger, record your details in the register (Form 17A), and provide you with a signed voter slip."
+    },
+    {
+      title: "Step 3: Casting Your Vote (EVM)",
+      icon: "🗳️",
+      desc: "Hand your voter slip to the third officer and proceed to the voting compartment. Locate the Electronic Voting Machine (EVM). Press the blue button next to the candidate/symbol of your choice."
+    },
+    {
+      title: "Step 4: VVPAT Verification",
+      icon: "🧾",
+      desc: "After voting, check the VVPAT machine window. A paper slip will appear for 7 seconds showing your chosen candidate's serial number, name, and symbol before dropping into the box."
+    }
+  ];
+
+  return (
+    <div className="card fade-in" style={{ borderColor: "rgba(59,130,246,0.3)" }}>
+      <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", fontWeight: 800, marginBottom: "var(--space-2)", textAlign: "center", color: "#f3f4f6" }}>
+        Official Voting Procedure
+      </h3>
+      <p style={{ color: "#9ca3af", textAlign: "center", marginBottom: "var(--space-6)" }}>
+        A Step-by-Step Guide for Citizens
+      </p>
+
+      {/* Embedded Auto-playing Video Guide */}
+      <div style={{ marginBottom: "var(--space-6)", borderRadius: "var(--radius-lg)", overflow: "hidden", position: "relative", paddingBottom: "56.25%", height: 0 }}>
+        <iframe
+          src="https://www.youtube.com/embed/XGJQNKFYqYI?autoplay=1&mute=1"
+          title="YouTube video player"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
+        />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+        {steps.map((step, i) => (
+          <div key={i} style={{ 
+            display: "flex", gap: "var(--space-4)", alignItems: "flex-start",
+            padding: "var(--space-5)", background: "rgba(255,255,255,0.02)", 
+            borderRadius: "var(--radius-lg)", border: "1px solid rgba(255,255,255,0.05)"
+          }}>
+            <div style={{ 
+              fontSize: "2rem", background: "linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15))", 
+              width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center",
+              borderRadius: "var(--radius-md)", border: "1px solid rgba(255,255,255,0.1)", flexShrink: 0,
+              boxShadow: "0 4px 15px rgba(0,0,0,0.2)"
+            }}>
+              {step.icon}
+            </div>
+            <div>
+              <h4 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#e5e7eb", marginBottom: 6 }}>
+                {step.title}
+              </h4>
+              <p style={{ color: "#9ca3af", fontSize: "0.95rem", lineHeight: 1.6 }}>
+                {step.desc}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <div style={{ marginTop: "var(--space-6)", padding: "var(--space-4)", background: "rgba(239, 68, 68, 0.1)", borderRadius: "var(--radius-md)", border: "1px solid rgba(239, 68, 68, 0.2)", textAlign: "center" }}>
+        <p style={{ color: "#fca5a5", fontSize: "0.9rem", fontWeight: 600 }}>
+          🔒 Protect the secrecy of your vote. Mobile phones are strictly prohibited inside the voting booth.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── Page ────────────────────────────────────────────────────────────────────
 export default function Informer() {
   const [activeTab, setActiveTab] = useState("ready");
 
   const tabs = [
     { id: "ready",      label: "✅ Am I Ready?" },
+    { id: "guide",      label: "📘 Voting Guide" },
+    { id: "registration",label: "📝 Voter ID Hub" },
     { id: "candidates", label: "📋 Candidates"  },
     { id: "mythbuster", label: "🔍 Myth-Buster" },
     { id: "ask",        label: "🤖 Ask AI"       },
@@ -337,6 +479,8 @@ export default function Informer() {
         </div>
 
         {activeTab === "ready"      && <RegistrationChecker />}
+        {activeTab === "guide"      && <VotingGuide />}
+        {activeTab === "registration" && <VoterRegistrationHub />}
         {activeTab === "candidates" && (
           <div className="grid-2">
             {DEMO_CANDIDATES.map((c) => <CandidateCard key={c._id} candidate={c} />)}

@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import path from "path";
+import mongoSanitize from "express-mongo-sanitize";
 
 import informerRoutes from "./routes/informer.js";
 import reporterRoutes from "./routes/reporter.js";
@@ -45,6 +46,7 @@ const limiter = rateLimit({
 app.use("/api", limiter);
 
 app.use(express.json({ limit: "10kb" }));
+app.use(mongoSanitize()); // Prevent NoSQL Injection attacks
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get("/api/health", (_req, res) =>

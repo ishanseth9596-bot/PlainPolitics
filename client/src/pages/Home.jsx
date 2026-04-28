@@ -114,7 +114,7 @@ export default function Home() {
       </section>
 
       {/* ── Stats strip ── */}
-      <section style={{ background: "var(--clr-surface)", borderTop: "1px solid var(--clr-border)", borderBottom: "1px solid var(--clr-border)", padding: "var(--space-6) 0" }}>
+      <section style={{ background: "var(--clr-surface)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderTop: "1px solid var(--clr-border)", borderBottom: "1px solid var(--clr-border)", padding: "var(--space-6) 0" }}>
         <div className="container">
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "var(--space-5)", textAlign: "center" }}>
             {[

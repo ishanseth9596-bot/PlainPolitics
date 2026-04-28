@@ -139,6 +139,15 @@ function PromiseTracker() {
 // ── Zen Mode ───────────────────────────────────────────────────────────────
 function ZenMode() {
   const [zen, setZen] = useState(() => localStorage.getItem("zenMode") === "true");
+  const [breath, setBreath] = useState("Breathe In...");
+
+  useEffect(() => {
+    if (!zen) return;
+    const interval = setInterval(() => {
+      setBreath(prev => prev === "Breathe In..." ? "Hold..." : prev === "Hold..." ? "Breathe Out..." : "Breathe In...");
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [zen]);
 
   const toggle = () => {
     const next = !zen;
@@ -165,11 +174,11 @@ function ZenMode() {
 
       {zen ? (
         <div className="fade-in" style={{ textAlign: "center", padding: "var(--space-8) var(--space-5)" }}>
-          <div style={{ fontSize: "4rem", marginBottom: "var(--space-4)" }}>🌿</div>
-          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", fontWeight: 700, marginBottom: 8 }}>
-            You're in Zen Mode
+          <div style={{ fontSize: "4rem", marginBottom: "var(--space-4)", transition: "transform 4s ease-in-out", transform: breath === "Breathe In..." ? "scale(1.2)" : breath === "Breathe Out..." ? "scale(0.8)" : "scale(1)" }}>🌿</div>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", fontWeight: 700, marginBottom: 8, color: "var(--clr-primary)" }}>
+            {breath}
           </h3>
-          <p style={{ color: "#94a3b8", maxWidth: 480, marginInline: "auto", lineHeight: 1.8 }}>
+          <p style={{ color: "#94a3b8", maxWidth: 480, marginInline: "auto", lineHeight: 1.8, marginTop: "var(--space-4)" }}>
             All speculation and noise is blocked. Take a breath. We'll send you one notification
             when the <strong style={{ color: "#e2e8f0" }}>official, certified result</strong> is announced.
             Until then, step outside, call a friend, or make a cup of tea. 🍵

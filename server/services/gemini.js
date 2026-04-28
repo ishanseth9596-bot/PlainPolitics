@@ -15,7 +15,7 @@ if (useVertexAI) {
     location: process.env.GOOGLE_CLOUD_LOCATION || "us-central1",
   });
   generativeModel = vertexAI.getGenerativeModel({
-    model: "gemini-2.0-flash-001",
+    model: "gemini-1.5-flash",
     generationConfig: {
       temperature: 0.4,
       topK: 40,
@@ -27,7 +27,7 @@ if (useVertexAI) {
 
 // ── Gemini REST (local dev with API key) ────────────────────────────────────
 const GEMINI_REST_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 async function callGeminiRest(prompt, systemInstruction) {
   const body = {
