@@ -150,6 +150,11 @@ function ZenMode() {
   }, [zen]);
 
   const toggle = () => {
+    const isAuth = localStorage.getItem("plainpolitics_auth");
+    if (!isAuth) {
+      window.location.href = "/login";
+      return;
+    }
     const next = !zen;
     setZen(next);
     localStorage.setItem("zenMode", String(next));

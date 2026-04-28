@@ -154,7 +154,14 @@ function SOSDashboard() {
             <button
               id="show-form-btn"
               className="btn btn-danger"
-              onClick={() => setShowForm(true)}
+              onClick={() => {
+                const isAuth = localStorage.getItem("plainpolitics_auth");
+                if (!isAuth) {
+                  window.location.href = "/login";
+                  return;
+                }
+                setShowForm(true);
+              }}
               style={{ fontSize: "0.9rem", padding: "12px 24px" }}
             >
               📍 Log Incident Report
@@ -421,6 +428,75 @@ function SmartRouting() {
   );
 }
 
+// ── AI Booth Surveillance ───────────────────────────────────────────────────
+function BoothSurveillance() {
+  const [anomaly, setAnomaly] = useState(false);
+  const [dispatching, setDispatching] = useState(false);
+
+  const simulateAnomaly = () => {
+    setAnomaly(true);
+    setDispatching(true);
+    setTimeout(() => setDispatching(false), 3000); // simulated dispatch time
+  };
+
+  return (
+    <div className="card" style={{ borderColor: anomaly ? "var(--clr-danger)" : "rgba(59,130,246,0.3)", transition: "all 0.3s" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-3)" }}>
+        <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: anomaly ? "var(--clr-danger)" : "#f3f4f6" }}>
+          🎥 Live AI CCTV Monitoring
+        </h3>
+        <span style={{ fontSize: "0.75rem", padding: "2px 8px", borderRadius: "12px", background: anomaly ? "rgba(239,68,68,0.2)" : "rgba(16,185,129,0.2)", color: anomaly ? "#ef4444" : "#10b981", fontWeight: "bold", display: "flex", alignItems: "center", gap: 4 }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: anomaly ? "#ef4444" : "#10b981", display: "inline-block", animation: "pulse 1.5s infinite" }}></span>
+          {anomaly ? "ANOMALY DETECTED" : "SYSTEM NORMAL"}
+        </span>
+      </div>
+      <p style={{ color: "#9ca3af", fontSize: "0.85rem", marginBottom: "var(--space-4)" }}>
+        AI analyzes crowd behavior in real-time. If physical violence or booth capturing is detected, emergency services are auto-dispatched.
+      </p>
+
+      <div style={{ position: "relative", width: "100%", height: 250, background: "#000", borderRadius: "var(--radius-md)", overflow: "hidden", border: `2px solid ${anomaly ? "var(--clr-danger)" : "#333"}`, marginBottom: "var(--space-4)" }}>
+        <img 
+          src="https://images.unsplash.com/photo-1526466508115-4fa81ee4234c?w=800&q=80" 
+          alt="CCTV Crowd Feed" 
+          style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.7, filter: anomaly ? "contrast(1.2) saturate(1.5)" : "grayscale(50%)" }}
+        />
+        {anomaly && (
+          <div style={{ position: "absolute", top: "35%", left: "35%", width: "140px", height: "120px", border: "3px solid var(--clr-danger)", boxShadow: "0 0 15px rgba(239,68,68,0.5)", borderRadius: 4, zIndex: 2 }}>
+            <span style={{ position: "absolute", top: -20, left: -3, background: "var(--clr-danger)", color: "#fff", fontSize: "0.6rem", padding: "2px 4px", fontWeight: "bold" }}>FIGHT (96%)</span>
+          </div>
+        )}
+        <div style={{ position: "absolute", bottom: 8, right: 8, color: "#fff", fontSize: "0.7rem", fontFamily: "monospace", textShadow: "1px 1px 2px #000" }}>
+          CAM_04_BOOTH | {new Date().toLocaleTimeString()}
+        </div>
+      </div>
+
+      {!anomaly ? (
+        <button onClick={simulateAnomaly} className="btn btn-outline" style={{ width: "100%", justifyContent: "center" }}>
+          ⚠️ Simulate Altercation at Booth
+        </button>
+      ) : (
+        <div className="fade-in" style={{ padding: "var(--space-3)", background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "var(--radius-md)" }}>
+          <p style={{ color: "#fca5a5", fontSize: "0.9rem", fontWeight: 600, margin: 0, marginBottom: 6 }}>
+            🚨 CRITICAL ALERT TRIGGERED
+          </p>
+          {dispatching ? (
+            <p style={{ color: "#e2e8f0", fontSize: "0.85rem", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+              <Spinner size={16} /> Contacting Emergency Dispatch...
+            </p>
+          ) : (
+            <p style={{ color: "#10b981", fontSize: "0.85rem", margin: 0 }}>
+              ✅ <strong>Auto-Dispatch Confirmed:</strong> Police (100) and Ambulance (108) units are en-route to Booth #42.
+            </p>
+          )}
+          <button onClick={() => setAnomaly(false)} className="btn btn-outline" style={{ marginTop: 12, padding: "6px 12px", fontSize: "0.75rem" }}>
+            Reset Simulation
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Page ────────────────────────────────────────────────────────────────────
 export default function Reporter() {
   const [activeTab, setActiveTab] = useState("sos");
@@ -429,6 +505,7 @@ export default function Reporter() {
     { id: "sos",     label: "🆘 SOS Dashboard" },
     { id: "routing", label: "🗺️ Smart Routing"  },
     { id: "checkin", label: "📍 Booth Check-In" },
+    { id: "cctv",    label: "🎥 AI CCTV Monitor" },
   ];
 
   return (
@@ -465,6 +542,7 @@ export default function Reporter() {
         {activeTab === "sos"     && <SOSDashboard />}
         {activeTab === "routing" && <SmartRouting />}
         {activeTab === "checkin" && <BoothCheckin />}
+        {activeTab === "cctv"    && <BoothSurveillance />}
       </div>
     </div>
   );
