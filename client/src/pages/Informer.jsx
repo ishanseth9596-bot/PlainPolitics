@@ -330,14 +330,24 @@ function VotingGuide() {
       </p>
 
       {/* Embedded Auto-playing Video Guide */}
-      <div style={{ marginBottom: "var(--space-6)", borderRadius: "var(--radius-lg)", overflow: "hidden", position: "relative", paddingBottom: "56.25%", height: 0 }}>
+      <div style={{ marginBottom: "var(--space-6)", borderRadius: "var(--radius-lg)", overflow: "hidden", position: "relative", paddingBottom: "56.25%", height: 0, background: "#000" }}>
         <iframe
-          src="https://www.youtube.com/embed/XGJQNKFYqYI?autoplay=1&mute=1"
-          title="YouTube video player"
+          src="https://www.youtube.com/embed/XGJQNKFYqYI?si=Wp_7v6O3O_6L8K9S&amp;autoplay=1&amp;mute=1"
+          title="Official ECI Voting Procedure"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
           style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
         />
+      </div>
+      <div style={{ textAlign: "center", marginBottom: "var(--space-6)" }}>
+        <a 
+          href="https://www.youtube.com/watch?v=XGJQNKFYqYI" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{ fontSize: "0.85rem", color: "#111", textDecoration: "underline", fontWeight: 600 }}
+        >
+          📺 Video not loading? Click to watch official guide on YouTube
+        </a>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
