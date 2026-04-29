@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import path from "path";
 import mongoSanitize from "express-mongo-sanitize";
+import fs from "fs";
 
 import informerRoutes from "./routes/informer.js";
 import reporterRoutes from "./routes/reporter.js";
@@ -22,7 +23,12 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ── Security middleware ────────────────────────────────────────────────────────
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // Disable CSP for demo to allow Maps/Translate/Fonts
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
 // In production (Cloud Run) the React build is served from the same origin,
 // so CORS is only needed for local development.
@@ -60,7 +66,19 @@ app.use("/api/tracker", trackerRoutes);
 app.use("/api/ai", aiRoutes);
 
 // ── Serve React build (production / Cloud Run) ───────────────────────────────
-const clientBuild = path.join(__dirname, "../client/dist");
+let clientBuild = path.join(__dirname, "../client/dist");
+
+// Robust check for index.html location in different environments
+if (!fs.existsSync(path.join(clientBuild, "index.html"))) {
+  // Try flat structure (Docker)
+  clientBuild = path.join(__dirname, "./client/dist");
+}
+
+if (!fs.existsSync(path.join(clientBuild, "index.html"))) {
+  // Last resort: current working directory
+  clientBuild = path.join(process.cwd(), "client/dist");
+}
+
 app.use(express.static(clientBuild));
 // React Router catch-all — must come AFTER all API routes
 app.get("*", (_req, res) =>
