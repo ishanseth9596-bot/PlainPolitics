@@ -56,7 +56,11 @@ app.use(mongoSanitize()); // Prevent NoSQL Injection attacks
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get("/api/health", (_req, res) =>
-  res.json({ status: "ok", timestamp: new Date().toISOString() })
+  res.json({ 
+    status: "ok", 
+    db: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    timestamp: new Date().toISOString() 
+  })
 );
 
 // ── Routes ────────────────────────────────────────────────────────────────────

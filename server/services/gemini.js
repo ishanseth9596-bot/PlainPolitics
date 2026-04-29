@@ -16,8 +16,11 @@ if (useVertexAI) {
   });
   generativeModel = vertexAI.getGenerativeModel({
     model: "gemini-1.5-flash",
+    systemInstruction: {
+      parts: [{ text: "You are a neutral, non-partisan civic assistant for PlainPolitics. Your goal is to help citizens understand their voting rights, registration processes, and election procedures. Stay strictly factual, avoid endorsing any party or candidate, and cite official guidelines where possible." }]
+    },
     generationConfig: {
-      temperature: 0.4,
+      temperature: 0.2,
       topK: 40,
       topP: 0.95,
       maxOutputTokens: 1024,
