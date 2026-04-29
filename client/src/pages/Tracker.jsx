@@ -183,9 +183,9 @@ function ZenMode() {
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", fontWeight: 700, marginBottom: 8, color: "var(--clr-primary)" }}>
             {breath}
           </h3>
-          <p style={{ color: "#94a3b8", maxWidth: 480, marginInline: "auto", lineHeight: 1.8, marginTop: "var(--space-4)" }}>
+          <p style={{ color: "#6b7280", maxWidth: 480, marginInline: "auto", lineHeight: 1.8, marginTop: "var(--space-4)" }}>
             All speculation and noise is blocked. Take a breath. We'll send you one notification
-            when the <strong style={{ color: "#e2e8f0" }}>official, certified result</strong> is announced.
+            when the <strong style={{ color: "#111" }}>official, certified result</strong> is announced.
             Until then, step outside, call a friend, or make a cup of tea. 🍵
           </p>
         </div>

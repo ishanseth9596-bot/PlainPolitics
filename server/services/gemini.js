@@ -71,11 +71,19 @@ async function callVertexAI(prompt, systemInstruction) {
  * Automatically uses Vertex AI on Cloud Run, REST API key locally.
  */
 export const askGemini = async (prompt, systemInstruction = "") => {
+  // Try Vertex AI first if configured
   if (useVertexAI) {
-    return callVertexAI(prompt, systemInstruction);
+    try {
+      return await callVertexAI(prompt, systemInstruction);
+    } catch (err) {
+      console.warn("⚠️ Vertex AI failed, falling back to REST API:", err.message);
+      // Fall through to REST fallback
+    }
   }
+
+  // Fallback to REST API key
   if (!process.env.GEMINI_API_KEY) {
-    throw new Error("Set GEMINI_API_KEY (local) or GOOGLE_CLOUD_PROJECT (Cloud Run).");
+    throw new Error("Set GEMINI_API_KEY (local) or ensure Vertex AI is enabled (Cloud Run).");
   }
   return callGeminiRest(prompt, systemInstruction);
 };
