@@ -51,22 +51,22 @@ export default function News() {
     <div className="section">
       <div className="container">
         <div style={{ marginBottom: "var(--space-6)", textAlign: "center" }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", fontWeight: 800, marginBottom: "var(--space-3)", color: "#f8fafc" }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", fontWeight: 800, marginBottom: "var(--space-3)", color: "#111" }}>
             📰 Election News Update
           </h2>
-          <p style={{ color: "#9ca3af", maxWidth: 600, marginInline: "auto" }}>
+          <p style={{ color: "#6b7280", maxWidth: 600, marginInline: "auto" }}>
             Stay informed with verified, non-partisan updates from the Election Commission and top news outlets. No noise, just the facts.
           </p>
         </div>
 
-        <div className="card fade-in" style={{ borderColor: "rgba(16,185,129,0.3)", maxWidth: 800, marginInline: "auto" }}>
+        <div className="card fade-in" style={{ maxWidth: 800, marginInline: "auto" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)", marginBottom: "var(--space-5)" }}>
             {MOCK_NEWS.map((news) => (
               <div key={news.id} style={{ 
                 padding: "var(--space-3)", 
-                background: "var(--clr-surface-2)", 
+                background: "#f9fafb", 
                 borderRadius: "var(--radius-md)", 
-                border: "1px solid rgba(255,255,255,0.05)", 
+                border: "1px solid rgba(0,0,0,0.06)", 
                 display: "flex", 
                 gap: 16,
                 alignItems: "flex-start" 
@@ -79,15 +79,15 @@ export default function News() {
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%" }}>
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                      <p style={{ color: "#e5e7eb", fontWeight: 600, fontSize: "1.05rem", margin: 0, lineHeight: 1.3 }}>{news.title}</p>
-                      <span style={{ fontSize: "0.75rem", background: "rgba(16,185,129,0.1)", color: "#10b981", padding: "4px 12px", borderRadius: "var(--radius-full)", fontWeight: 600, whiteSpace: "nowrap", marginLeft: 12 }}>
+                      <p style={{ color: "#111", fontWeight: 600, fontSize: "1.05rem", margin: 0, lineHeight: 1.3 }}>{news.title}</p>
+                      <span style={{ fontSize: "0.75rem", background: "#d1fae5", color: "#065f46", padding: "4px 12px", borderRadius: "var(--radius-full)", fontWeight: 600, whiteSpace: "nowrap", marginLeft: 12 }}>
                         {news.tag}
                       </span>
                     </div>
-                    <p style={{ color: "#64748b", fontSize: "0.85rem", margin: 0 }}>{news.time}</p>
+                    <p style={{ color: "#6b7280", fontSize: "0.85rem", margin: 0 }}>{news.time}</p>
                   </div>
                   <div style={{ marginTop: 12 }}>
-                    <a href={news.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.85rem", color: "var(--clr-primary)", textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <a href={news.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.85rem", color: "#111", textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
                       Read Article <span style={{ fontSize: "1.1em" }}>↗</span>
                     </a>
                   </div>
@@ -96,9 +96,9 @@ export default function News() {
             ))}
           </div>
 
-          <div style={{ padding: "var(--space-5)", background: "rgba(59,130,246,0.1)", borderRadius: "var(--radius-md)", border: "1px solid rgba(59,130,246,0.2)", textAlign: "center" }}>
-            <h4 style={{ color: "#bfdbfe", marginBottom: 8, fontSize: "1.1rem" }}>Want SMS Alerts?</h4>
-            <p style={{ color: "#93c5fd", fontSize: "0.9rem", marginBottom: "var(--space-4)" }}>
+          <div style={{ padding: "var(--space-5)", background: "#f3f4f6", borderRadius: "var(--radius-md)", border: "1px solid rgba(0,0,0,0.08)", textAlign: "center" }}>
+            <h4 style={{ color: "#111", marginBottom: 8, fontSize: "1.1rem" }}>Want SMS Alerts?</h4>
+            <p style={{ color: "#6b7280", fontSize: "0.9rem", marginBottom: "var(--space-4)" }}>
               Get critical election news sent directly to your verified phone number.
             </p>
             <button 

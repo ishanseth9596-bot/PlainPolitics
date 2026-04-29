@@ -100,10 +100,10 @@ export default function Home() {
                 <span className={`phase-badge ${p.badgeClass}`} style={{ marginBottom: 8 }}>
                   {p.badge} · {p.subtitle}
                 </span>
-                <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: 700, marginBottom: 8, color: "#f1f5f9" }}>
+                <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: 700, marginBottom: 8, color: "#111" }}>
                   {p.title}
                 </h3>
-                <p style={{ color: "#94a3b8", fontSize: "0.9rem", lineHeight: 1.6 }}>{p.desc}</p>
+                <p style={{ color: "#6b7280", fontSize: "0.9rem", lineHeight: 1.6 }}>{p.desc}</p>
                 <div style={{ marginTop: "var(--space-4)", color: p.color, fontSize: "0.85rem", fontWeight: 600 }}>
                   Explore →
                 </div>
@@ -135,12 +135,12 @@ export default function Home() {
       {/* ── AI Chat teaser ── */}
       <section className="section">
         <div className="container" style={{ maxWidth: 720 }}>
-          <div className="card" style={{ borderColor: "rgba(79,142,247,0.2)", textAlign: "center" }}>
+          <div className="card" style={{ textAlign: "center" }}>
             <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-3)" }}>🤖</div>
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", fontWeight: 700, marginBottom: 8 }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", fontWeight: 700, marginBottom: 8, color: "#111" }}>
               Ask the Civic AI anything
             </h2>
-            <p style={{ color: "#94a3b8", fontSize: "0.9rem", marginBottom: "var(--space-5)" }}>
+            <p style={{ color: "#6b7280", fontSize: "0.9rem", marginBottom: "var(--space-5)" }}>
               Powered by Gemini. Non-partisan, fact-based answers about your voting rights, deadlines, and procedures.
             </p>
             <Link to="/informer" id="cta-ask-ai" className="btn btn-primary">

@@ -7,6 +7,7 @@ const links = [
   { to: "/informer", label: "Phase 1 — Inform"  },
   { to: "/reporter", label: "Phase 2 — Report"  },
   { to: "/tracker",  label: "Phase 3 — Track"   },
+  { to: "/ask-ai",   label: "🤖 Ask AI"         },
 ];
 
 export default function Navbar() {

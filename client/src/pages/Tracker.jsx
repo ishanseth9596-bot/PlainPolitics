@@ -53,7 +53,7 @@ function PromiseCard({ promise: init }) {
           <span style={{ fontSize: "0.7rem", background: "rgba(79,142,247,0.15)", color: "var(--clr-primary)", padding: "2px 8px", borderRadius: "var(--radius-full)", fontWeight: 600 }}>
             {promise.category}
           </span>
-          <h4 style={{ fontFamily: "var(--font-display)", fontSize: "0.95rem", fontWeight: 700, color: "#f1f5f9", marginTop: 6 }}>
+          <h4 style={{ fontFamily: "var(--font-display)", fontSize: "0.95rem", fontWeight: 700, color: "#111", marginTop: 6 }}>
             {promise.title}
           </h4>
         </div>
@@ -167,7 +167,7 @@ function ZenMode() {
           <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, marginBottom: 4 }}>
             🧘 Zen Mode {zen ? "— Active" : ""}
           </h3>
-          <p style={{ color: "#94a3b8", fontSize: "0.85rem" }}>
+          <p style={{ color: "#6b7280", fontSize: "0.85rem" }}>
             Block all election speculation. Get notified <em>only</em> when official results are certified.
           </p>
         </div>
@@ -191,7 +191,7 @@ function ZenMode() {
         </div>
       ) : (
         <div style={{ marginTop: "var(--space-5)" }}>
-          <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginBottom: "var(--space-4)" }}>
+          <p style={{ color: "#6b7280", fontSize: "0.85rem", marginBottom: "var(--space-4)" }}>
             Post-election media burnout is real. Toggle Zen Mode above to protect your mental health.
           </p>
           <div className="grid-3">
@@ -202,7 +202,7 @@ function ZenMode() {
             ].map(({ emoji, tip }) => (
               <div key={tip} className="card" style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "2rem", marginBottom: 10 }}>{emoji}</div>
-                <p style={{ fontSize: "0.85rem", color: "#94a3b8" }}>{tip}</p>
+                <p style={{ fontSize: "0.85rem", color: "#6b7280" }}>{tip}</p>
               </div>
             ))}
           </div>
@@ -244,7 +244,7 @@ function DepolGuide() {
       <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, marginBottom: 8 }}>
         🤝 De-Polarisation Guide
       </h3>
-      <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginBottom: "var(--space-4)" }}>
+      <p style={{ color: "#6b7280", fontSize: "0.85rem", marginBottom: "var(--space-4)" }}>
         Election season can strain friendships and families. Tell us your concern — AI will suggest practical ways to reconnect.
       </p>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: "var(--space-3)" }}>
@@ -295,7 +295,7 @@ export default function Tracker() {
           <span className="phase-badge badge-tracker">Phase 3</span>
           <div>
             <h2>The Tracker</h2>
-            <p style={{ color: "#94a3b8", fontSize: "0.9rem" }}>Post-Election — Hold them accountable.</p>
+            <p style={{ color: "#6b7280", fontSize: "0.9rem" }}>Post-Election — Hold them accountable.</p>
           </div>
         </div>
 

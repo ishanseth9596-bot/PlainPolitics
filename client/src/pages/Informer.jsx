@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { factCheck, summariseManifesto } from "../services/api";
 import Spinner from "../components/Spinner";
 import AIBox from "../components/AIBox";
 import VoterRegistrationHub from "../components/VoterRegistrationHub";
+import ElectionTimeline from "../components/ElectionTimeline";
+import ElectionCards from "../components/ElectionCards";
 
 // ── Mock candidates (used when DB is not connected) ────────────────────────
 const DEMO_CANDIDATES = [
@@ -66,7 +68,7 @@ function RegistrationChecker() {
       <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, marginBottom: 8 }}>
         ✅ "Am I Ready?" Registration Checker
       </h3>
-      <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginBottom: "var(--space-4)" }}>
+      <p style={{ color: "#6b7280", fontSize: "0.85rem", marginBottom: "var(--space-4)" }}>
         Verify your voter registration status before polling day.
       </p>
       <form onSubmit={handleCheck} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -87,8 +89,8 @@ function RegistrationChecker() {
       {status === "found" && (
         <div className="fade-in" style={{ marginTop: "var(--space-4)", padding: "var(--space-4)", background: "rgba(16,185,129,0.1)", borderRadius: "var(--radius-md)", border: "1px solid rgba(16,185,129,0.3)" }}>
           <p style={{ color: "#10b981", fontWeight: 600 }}>✅ Registration Found (पंजीकरण मिल गया)</p>
-          <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginTop: 4 }}>
-            EPIC No: <strong style={{ color: "#e2e8f0" }}>{name}</strong><br />
+          <p style={{ color: "#6b7280", fontSize: "0.85rem", marginTop: 4 }}>
+            EPIC No: <strong style={{ color: "#111" }}>{name}</strong><br />
             Status: <strong style={{ color: "#10b981" }}>Active Voter (सक्रिय मतदाता)</strong><br />
             📸 <strong>Tip:</strong> Screenshot this page to prove your status at the polling booth.
           </p>
@@ -119,14 +121,14 @@ function RegistrationChecker() {
       {status === "not_found" && (
         <div className="fade-in" style={{ marginTop: "var(--space-4)", padding: "var(--space-4)", background: "rgba(239,68,68,0.1)", borderRadius: "var(--radius-md)", border: "1px solid rgba(239,68,68,0.3)" }}>
           <p style={{ color: "#ef4444", fontWeight: 600 }}>❌ Registration Not Found (पंजीकरण नहीं मिला)</p>
-          <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginTop: 4 }}>
-            We couldn't find a registration matching the EPIC number <strong style={{ color: "#e2e8f0" }}>{name}</strong>.<br />
+          <p style={{ color: "#6b7280", fontSize: "0.85rem", marginTop: 4 }}>
+            We couldn't find a registration matching the EPIC number <strong style={{ color: "#111" }}>{name}</strong>.<br />
             Please double-check the spelling or verify directly on the official portal.
           </p>
           
-          <div style={{ marginTop: "16px", background: "rgba(0,0,0,0.2)", padding: "12px", borderRadius: "var(--radius-sm)" }}>
-            <p style={{ color: "#fca5a5", fontSize: "0.85rem", fontWeight: 700, marginBottom: "8px" }}>Why might this happen? (Your vote is not ready if:)</p>
-            <ul style={{ color: "#e2e8f0", fontSize: "0.8rem", marginLeft: "20px", lineHeight: 1.6 }}>
+          <div style={{ marginTop: "16px", background: "#f9fafb", padding: "12px", borderRadius: "var(--radius-sm)", border: "1px solid rgba(0,0,0,0.06)" }}>
+            <p style={{ color: "#dc2626", fontSize: "0.85rem", fontWeight: 700, marginBottom: "8px" }}>Why might this happen? (Your vote is not ready if:)</p>
+            <ul style={{ color: "#374151", fontSize: "0.8rem", marginLeft: "20px", lineHeight: 1.6 }}>
               <li><strong>Typo in EPIC Number:</strong> Double-check the exact alphanumeric code on your Voter ID card.</li>
               <li><strong>Not Registered Yet:</strong> Having an Aadhaar or PAN does not mean you can vote. You must apply for a Voter ID (Form 6).</li>
               <li><strong>Name Deleted:</strong> Your name may have been struck off during recent electoral roll revisions.</li>
@@ -177,7 +179,7 @@ function CandidateCard({ candidate }) {
     <div className="card fade-in" style={{ borderColor: "rgba(79,142,247,0.15)" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: "var(--space-4)" }}>
         <div>
-          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#f1f5f9" }}>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#111" }}>
             {candidate.name}
           </h3>
           <p style={{ color: "var(--clr-primary)", fontSize: "0.85rem", fontWeight: 600 }}>{candidate.party}</p>
@@ -208,7 +210,7 @@ function CandidateCard({ candidate }) {
         {candidate.manifesto.slice(0, 3).map((p, i) => (
           <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 6 }}>
             <span style={{ fontSize: "0.7rem", background: "rgba(79,142,247,0.15)", color: "var(--clr-primary)", padding: "2px 6px", borderRadius: "var(--radius-full)", whiteSpace: "nowrap" }}>{p.category}</span>
-            <span style={{ fontSize: "0.85rem", color: "#94a3b8" }}>{p.promise}</span>
+            <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>{p.promise}</span>
           </div>
         ))}
       </div>
@@ -262,7 +264,7 @@ function MythBuster() {
       <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, marginBottom: 8 }}>
         🔍 Myth-Buster Engine
       </h3>
-      <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginBottom: "var(--space-4)" }}>
+      <p style={{ color: "#6b7280", fontSize: "0.85rem", marginBottom: "var(--space-4)" }}>
         Heard a rumour about the election? Paste the claim — we'll fact-check it.
       </p>
       <form onSubmit={handleCheck} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -284,7 +286,7 @@ function MythBuster() {
           <p style={{ fontSize: "0.75rem", fontWeight: 700, color: verdictColor, marginBottom: 8, letterSpacing: "0.06em", textTransform: "uppercase" }}>
             🔎 Fact-Check Result
           </p>
-          <p style={{ color: "#e2e8f0", lineHeight: 1.8 }}>{result}</p>
+          <p style={{ color: "#374151", lineHeight: 1.8 }}>{result}</p>
         </div>
       )}
     </div>
@@ -294,24 +296,39 @@ function MythBuster() {
 // ── AI Q&A ─────────────────────────────────────────────────────────────────
 function CivicQA() {
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { askAI: _askAI } = { askAI: null }; // resolved via direct API call below
+  const chatEndRef = useRef(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
 
   const handleAsk = async (e) => {
     e.preventDefault();
     if (!question.trim()) return;
+    
+    const userQ = question;
+    setMessages((prev) => [...prev, { role: "user", content: userQ }]);
+    setQuestion("");
     setLoading(true);
-    setAnswer(null);
+    
     try {
       const { askAI: apiAsk } = await import("../services/api");
-      const { data } = await apiAsk(question);
-      setAnswer(data.answer);
+      const { data } = await apiAsk(userQ);
+      setMessages((prev) => [...prev, { role: "ai", content: data.answer }]);
     } catch {
-      setAnswer("I'm not able to connect to the AI right now. Please visit your official Election Commission website for authoritative answers.");
+      setMessages((prev) => [
+        ...prev, 
+        { role: "ai", content: "I'm not able to connect to the AI right now. Please visit your official Election Commission website for authoritative answers." }
+      ]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSampleClick = (s) => {
+    setQuestion(s);
   };
 
   const samples = [
@@ -321,25 +338,74 @@ function CivicQA() {
   ];
 
   return (
-    <div className="card" style={{ borderColor: "rgba(124,58,237,0.2)" }}>
-      <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, marginBottom: 8 }}>
+    <div className="card fade-in" style={{ borderColor: "rgba(124,58,237,0.3)", display: "flex", flexDirection: "column", minHeight: "550px" }}>
+      <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, marginBottom: 8, color: "#111" }}>
         🤖 Ask the Civic AI
       </h3>
-      <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginBottom: "var(--space-4)" }}>
+      <p style={{ color: "#6b7280", fontSize: "0.85rem", marginBottom: "var(--space-4)" }}>
         Gemini-powered, non-partisan answers about your voting rights.
       </p>
+
+      {/* Chat History Window */}
+      <div 
+        style={{ 
+          flex: 1, overflowY: "auto", marginBottom: "var(--space-4)", paddingRight: "8px",
+          display: "flex", flexDirection: "column", gap: "12px",
+          border: "1px solid rgba(0,0,0,0.06)", borderRadius: "var(--radius-md)", padding: "16px",
+          background: "#f9fafb", maxHeight: "400px"
+        }}
+        className="chat-window"
+      >
+        {messages.length === 0 ? (
+          <div style={{ margin: "auto", textAlign: "center", color: "#64748b", fontSize: "0.9rem" }}>
+            <div style={{ fontSize: "2rem", marginBottom: "12px" }}>🤖</div>
+            <p>Start chatting with PlainPolitics AI!</p>
+            <p style={{ marginTop: "8px" }}>Try asking one of the examples below.</p>
+          </div>
+        ) : (
+          messages.map((msg, i) => (
+            <div 
+              key={i} 
+              className="fade-in"
+              style={{ 
+                alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
+                maxWidth: "85%",
+                padding: "12px 16px",
+                borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                background: msg.role === "user" ? "#111" : "#f3f4f6",
+                border: msg.role === "user" ? "none" : "1px solid rgba(0,0,0,0.08)",
+                color: msg.role === "user" ? "#fff" : "#374151",
+                fontSize: "0.95rem", lineHeight: 1.6,
+                whiteSpace: "pre-wrap",
+                boxShadow: msg.role === "user" ? "0 4px 10px rgba(0,0,0,0.15)" : "none"
+              }}
+            >
+              {msg.role === "ai" && <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#6b7280", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>✨ Civic AI</div>}
+              {msg.content}
+            </div>
+          ))
+        )}
+        {loading && (
+          <div className="fade-in" style={{ alignSelf: "flex-start", padding: "12px 16px", borderRadius: "16px 16px 16px 4px", background: "#f3f4f6", border: "1px solid rgba(0,0,0,0.06)" }}>
+            <Spinner size={24} />
+          </div>
+        )}
+        <div ref={chatEndRef} />
+      </div>
+
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: "var(--space-3)" }}>
         {samples.map((s) => (
           <button
             key={s}
             className="btn btn-outline"
             style={{ fontSize: "0.75rem", padding: "6px 12px" }}
-            onClick={() => setQuestion(s)}
+            onClick={() => handleSampleClick(s)}
           >
             {s}
           </button>
         ))}
       </div>
+      
       <form onSubmit={handleAsk} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <input
           id="civic-question"
@@ -350,12 +416,10 @@ function CivicQA() {
           onChange={(e) => setQuestion(e.target.value)}
           required
         />
-        <button id="civic-ask-btn" type="submit" className="btn btn-primary" style={{ padding: "12px 20px" }} disabled={loading}>
-          {loading ? "Asking…" : "Ask"}
+        <button id="civic-ask-btn" type="submit" className="btn btn-primary" style={{ padding: "12px 24px" }} disabled={loading}>
+          {loading ? "Asking…" : "Send 🚀"}
         </button>
       </form>
-      {loading && <Spinner size={28} />}
-      {answer && <AIBox text={answer} />}
     </div>
   );
 }
@@ -387,10 +451,10 @@ function VotingGuide() {
 
   return (
     <div className="card fade-in" style={{ borderColor: "rgba(59,130,246,0.3)" }}>
-      <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", fontWeight: 800, marginBottom: "var(--space-2)", textAlign: "center", color: "#f3f4f6" }}>
+      <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", fontWeight: 800, marginBottom: "var(--space-2)", textAlign: "center", color: "#111" }}>
         Official Voting Procedure
       </h3>
-      <p style={{ color: "#9ca3af", textAlign: "center", marginBottom: "var(--space-6)" }}>
+      <p style={{ color: "#6b7280", textAlign: "center", marginBottom: "var(--space-6)" }}>
         A Step-by-Step Guide for Citizens
       </p>
 
@@ -409,22 +473,22 @@ function VotingGuide() {
         {steps.map((step, i) => (
           <div key={i} style={{ 
             display: "flex", gap: "var(--space-4)", alignItems: "flex-start",
-            padding: "var(--space-5)", background: "rgba(255,255,255,0.02)", 
-            borderRadius: "var(--radius-lg)", border: "1px solid rgba(255,255,255,0.05)"
+            padding: "var(--space-5)", background: "#f9fafb", 
+            borderRadius: "var(--radius-lg)", border: "1px solid rgba(0,0,0,0.06)"
           }}>
             <div style={{ 
-              fontSize: "2rem", background: "linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15))", 
+              fontSize: "2rem", background: "#fff", 
               width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center",
-              borderRadius: "var(--radius-md)", border: "1px solid rgba(255,255,255,0.1)", flexShrink: 0,
-              boxShadow: "0 4px 15px rgba(0,0,0,0.2)"
+              borderRadius: "var(--radius-md)", border: "1px solid rgba(0,0,0,0.08)", flexShrink: 0,
+              boxShadow: "var(--shadow-sm)"
             }}>
               {step.icon}
             </div>
             <div>
-              <h4 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#e5e7eb", marginBottom: 6 }}>
+              <h4 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#111", marginBottom: 6 }}>
                 {step.title}
               </h4>
-              <p style={{ color: "#9ca3af", fontSize: "0.95rem", lineHeight: 1.6 }}>
+              <p style={{ color: "#6b7280", fontSize: "0.95rem", lineHeight: 1.6 }}>
                 {step.desc}
               </p>
             </div>
@@ -433,7 +497,7 @@ function VotingGuide() {
       </div>
       
       <div style={{ marginTop: "var(--space-6)", padding: "var(--space-4)", background: "rgba(239, 68, 68, 0.1)", borderRadius: "var(--radius-md)", border: "1px solid rgba(239, 68, 68, 0.2)", textAlign: "center" }}>
-        <p style={{ color: "#fca5a5", fontSize: "0.9rem", fontWeight: 600 }}>
+        <p style={{ color: "#dc2626", fontSize: "0.9rem", fontWeight: 600 }}>
           🔒 Protect the secrecy of your vote. Mobile phones are strictly prohibited inside the voting booth.
         </p>
       </div>
@@ -443,13 +507,15 @@ function VotingGuide() {
 
 // ── Page ────────────────────────────────────────────────────────────────────
 export default function Informer() {
-  const [activeTab, setActiveTab] = useState("ready");
+  const [activeTab, setActiveTab] = useState("timeline");
 
   const tabs = [
-    { id: "ready",      label: "✅ Am I Ready?" },
-    { id: "guide",      label: "📘 Voting Guide" },
+    { id: "timeline",   label: "⏱️ Timeline" },
+    { id: "elections",  label: "🗳️ Elections" },
     { id: "registration",label: "📝 Voter ID Hub" },
+    { id: "ready",      label: "✅ Am I Ready?" },
     { id: "candidates", label: "📋 Candidates"  },
+    { id: "guide",      label: "📘 Voting Guide" },
     { id: "mythbuster", label: "🔍 Myth-Buster" },
     { id: "ask",        label: "🤖 Ask AI"       },
   ];
@@ -457,12 +523,10 @@ export default function Informer() {
   return (
     <div className="section">
       <div className="container">
-        <div className="phase-header">
-          <span className="phase-badge badge-informer">Phase 1</span>
-          <div>
-            <h2>The Informer</h2>
-            <p style={{ color: "#94a3b8", fontSize: "0.9rem" }}>Pre-Election — Know before you go.</p>
-          </div>
+        <div style={{ marginBottom: "var(--space-7)" }}>
+          <span className="phase-badge badge-informer" style={{ marginBottom: "var(--space-3)", display: "inline-flex" }}>Phase 1</span>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "2.2rem", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: "4px" }}>The Informer</h2>
+          <p style={{ color: "#6b7280", fontSize: "0.9rem" }}>Pre-Election — Know before you go.</p>
         </div>
 
         <div className="tabs">
@@ -481,6 +545,7 @@ export default function Informer() {
         {activeTab === "ready"      && <RegistrationChecker />}
         {activeTab === "guide"      && <VotingGuide />}
         {activeTab === "registration" && <VoterRegistrationHub />}
+        {activeTab === "elections"  && <ElectionCards />}
         {activeTab === "candidates" && (
           <div className="grid-2">
             {DEMO_CANDIDATES.map((c) => <CandidateCard key={c._id} candidate={c} />)}
@@ -488,6 +553,7 @@ export default function Informer() {
         )}
         {activeTab === "mythbuster" && <MythBuster />}
         {activeTab === "ask"        && <CivicQA />}
+        {activeTab === "timeline"   && <ElectionTimeline />}
       </div>
     </div>
   );
