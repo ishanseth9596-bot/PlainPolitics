@@ -9,8 +9,7 @@ const phases = [
     title: "The Informer",
     subtitle: "Pre-Election",
     desc: "Verify your registration, compare candidate manifestos with AI, and bust election myths before polling day.",
-    color: "var(--clr-informer)",
-    glow: "var(--shadow-glow-blue)",
+    color: "#111",
     to: "/informer",
   },
   {
@@ -21,8 +20,7 @@ const phases = [
     title: "The Reporter",
     subtitle: "Election Day",
     desc: "Real-time booth routing, one-tap SOS dashboard for stolen votes, machine failures, and intimidation.",
-    color: "var(--clr-reporter)",
-    glow: "var(--shadow-glow-amber)",
+    color: "#111",
     to: "/reporter",
   },
   {
@@ -33,9 +31,39 @@ const phases = [
     title: "The Tracker",
     subtitle: "Post-Election",
     desc: "Hold winners accountable with the Promise Tracker, toggle Zen Mode for mental peace, and de-polarise.",
-    color: "var(--clr-tracker)",
-    glow: "var(--shadow-glow-green)",
+    color: "#111",
     to: "/tracker",
+  },
+];
+
+const journeySteps = [
+  { 
+    title: "01. Registration", 
+    desc: "Get your Voter ID (EPIC) card ready. It's strictly free.", 
+    icon: "📝", 
+    action: "Register Now", 
+    to: "/informer" 
+  },
+  { 
+    title: "02. Verification", 
+    desc: "Check if your name is on the roll before polling day.", 
+    icon: "✅", 
+    action: "Check Status", 
+    to: "/informer" 
+  },
+  { 
+    title: "03. Voting", 
+    desc: "Find your booth and cast your vote securely on the EVM.", 
+    icon: "🗳️", 
+    action: "Find Booth", 
+    to: "/reporter" 
+  },
+  { 
+    title: "04. Results", 
+    desc: "Track promises and hold your representatives accountable.", 
+    icon: "📊", 
+    action: "Track Impact", 
+    to: "/tracker" 
   },
 ];
 
@@ -44,35 +72,76 @@ export default function Home() {
     <>
       {/* ── Hero ── */}
       <section className="hero">
-        <div className="hero__bg" />
         <div className="container">
-          <p className="hero__eyebrow">Your Civic Survival Assistant</p>
+          <span className="phase-badge badge-informer" style={{ marginBottom: "var(--space-4)", display: "inline-flex" }}>🚀 Built for #PromptWars by Hack2skill</span>
           <h1 className="hero__title">
-            Voting shouldn't be{" "}
-            <span className="gradient-text">confusing.</span>
+            Your Election Journey,<br />
+            <span className="gradient-text">Simplified.</span>
           </h1>
           <p className="hero__sub">
-            PlainPolitics guides you through every stage of the election — from
-            registration to results — with verified data and AI-powered clarity.
+            PlainPolitics guides you through the entire election lifecycle — from registration to accountability — with Gemini AI and real-time civic data.
           </p>
           <div className="hero__cta">
             <Link to="/informer" id="cta-start" className="btn btn-primary">
-              🚀 Get Started
+              🚀 Start Your Journey
             </Link>
-            <Link to="/reporter" id="cta-sos" className="btn btn-outline">
-              🆘 Election Day SOS
+            <Link to="/ask-ai" className="btn btn-outline">
+              🤖 Ask AI a Question
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── How it works ── */}
+      {/* ── Election Lifecycle (DemocrAI Inspiration) ── */}
+      <section className="section" style={{ background: "#fff", borderTop: "1px solid var(--clr-border)", borderBottom: "1px solid var(--clr-border)" }}>
+        <div className="container">
+          <div style={{ textAlign: "center", marginBottom: "var(--space-7)" }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "2.2rem", fontWeight: 800, color: "#111", marginBottom: 8 }}>
+              Understand the Process
+            </h2>
+            <p style={{ color: "#6b7280", fontSize: "1rem" }}>We break down the election step-by-step.</p>
+          </div>
+
+          <div className="grid-2" style={{ gap: "var(--space-6)" }}>
+             {journeySteps.map((step, i) => (
+               <div key={i} className="fade-in" style={{ 
+                 display: "flex", gap: "var(--space-4)", alignItems: "flex-start",
+                 padding: "var(--space-5)", background: "#f9fafb", 
+                 borderRadius: "var(--radius-lg)", border: "1px solid rgba(0,0,0,0.06)",
+                 animationDelay: `${i * 100}ms`
+               }}>
+                 <div style={{ 
+                   fontSize: "1.8rem", background: "#fff", 
+                   width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center",
+                   borderRadius: "var(--radius-md)", border: "1px solid rgba(0,0,0,0.08)", flexShrink: 0,
+                   boxShadow: "var(--shadow-sm)"
+                 }}>
+                   {step.icon}
+                 </div>
+                 <div>
+                   <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#111", marginBottom: 6 }}>
+                     {step.title}
+                   </h3>
+                   <p style={{ color: "#6b7280", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: 12 }}>
+                     {step.desc}
+                   </p>
+                   <Link to={step.to} style={{ fontSize: "0.85rem", fontWeight: 700, color: "#111", textDecoration: "underline" }}>
+                     {step.action} →
+                   </Link>
+                 </div>
+               </div>
+             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Three Core Pillars ── */}
       <section className="section">
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: "var(--space-7)" }}>
-            <span className="phase-badge badge-informer" style={{ marginBottom: 12, display: "inline-flex" }}>Three Phases</span>
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.6rem, 4vw, 2.5rem)", fontWeight: 700 }}>
-              We protect you before, during,<br />and after the vote.
+            <span className="phase-badge badge-informer" style={{ marginBottom: 12, display: "inline-flex" }}>The Platform</span>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.6rem, 4vw, 2.5rem)", fontWeight: 700, color: "#111" }}>
+              Three Pillars of Civic Action
             </h2>
           </div>
 
@@ -85,15 +154,16 @@ export default function Home() {
                 className="card fade-in"
                 style={{
                   animationDelay: `${i * 120}ms`,
-                  borderColor: `${p.color}30`,
+                  borderColor: "rgba(0,0,0,0.08)",
                   textDecoration: "none",
                 }}
               >
                 <div style={{
                   width: 56, height: 56, borderRadius: "var(--radius-md)",
-                  background: `${p.color}18`, display: "flex",
+                  background: "#f3f4f6", display: "flex",
                   alignItems: "center", justifyContent: "center",
                   fontSize: "1.8rem", marginBottom: "var(--space-4)",
+                  border: "1px solid rgba(0,0,0,0.06)"
                 }}>
                   {p.emoji}
                 </div>
@@ -104,8 +174,8 @@ export default function Home() {
                   {p.title}
                 </h3>
                 <p style={{ color: "#6b7280", fontSize: "0.9rem", lineHeight: 1.6 }}>{p.desc}</p>
-                <div style={{ marginTop: "var(--space-4)", color: p.color, fontSize: "0.85rem", fontWeight: 600 }}>
-                  Explore →
+                <div style={{ marginTop: "var(--space-4)", color: "#111", fontSize: "0.85rem", fontWeight: 700 }}>
+                  Enter {p.title} →
                 </div>
               </Link>
             ))}
@@ -113,38 +183,38 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Stats strip ── */}
-      <section style={{ background: "var(--clr-surface)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderTop: "1px solid var(--clr-border)", borderBottom: "1px solid var(--clr-border)", padding: "var(--space-6) 0" }}>
+      {/* ── Built With ── */}
+      <section style={{ background: "#f9fafb", borderTop: "1px solid var(--clr-border)", borderBottom: "1px solid var(--clr-border)", padding: "var(--space-6) 0" }}>
         <div className="container">
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "var(--space-5)", textAlign: "center" }}>
             {[
-              { stat: "3 Phases", label: "Full Election Lifecycle" },
-              { stat: "Gemini AI", label: "Powered Fact Checking" },
-              { stat: "Google Maps", label: "Live Booth Routing" },
-              { stat: "Zero PII", label: "Stored in Plain Text" },
+              { stat: "React", label: "Frontend Excellence" },
+              { stat: "Google Gemini", label: "Civic Intelligence" },
+              { stat: "Google Cloud", label: "Scalable Deployment" },
+              { stat: "Google Maps", label: "Strategic Routing" },
             ].map(({ stat, label }) => (
               <div key={stat}>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 800, color: "var(--clr-primary)", marginBottom: 4 }}>{stat}</div>
-                <div style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: 500 }}>{label}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 800, color: "#111", marginBottom: 4 }}>{stat}</div>
+                <div style={{ fontSize: "0.8rem", color: "#6b7280", fontWeight: 500 }}>{label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── AI Chat teaser ── */}
+      {/* ── AI Teaser ── */}
       <section className="section">
         <div className="container" style={{ maxWidth: 720 }}>
-          <div className="card" style={{ textAlign: "center" }}>
+          <div className="card" style={{ textAlign: "center", border: "1px solid #111" }}>
             <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-3)" }}>🤖</div>
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", fontWeight: 700, marginBottom: 8, color: "#111" }}>
-              Ask the Civic AI anything
+              Have a complex question?
             </h2>
             <p style={{ color: "#6b7280", fontSize: "0.9rem", marginBottom: "var(--space-5)" }}>
-              Powered by Gemini. Non-partisan, fact-based answers about your voting rights, deadlines, and procedures.
+              Our non-partisan Civic AI (Gemini) is available 24/7 to explain registration, your rights, and polling procedures.
             </p>
-            <Link to="/informer" id="cta-ask-ai" className="btn btn-primary">
-              💬 Ask a Question
+            <Link to="/ask-ai" id="cta-ask-ai" className="btn btn-primary">
+              💬 Ask PlainPolitics AI
             </Link>
           </div>
         </div>
@@ -152,3 +222,4 @@ export default function Home() {
     </>
   );
 }
+
