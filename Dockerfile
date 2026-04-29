@@ -7,7 +7,7 @@ WORKDIR /app/client
 
 # Install deps first (layer caching)
 COPY client/package*.json ./
-RUN npm ci --omit=dev
+RUN npm ci
 
 # Copy source and build
 COPY client/ ./
