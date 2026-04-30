@@ -246,8 +246,9 @@ function MythBuster() {
     try {
       const { data } = await factCheck(claim);
       setResult(data.result);
-    } catch {
-      setResult("Unable to fact-check right now. Please verify with your Election Commission's official website.");
+    } catch (err) {
+      console.error("Myth-buster API error:", err);
+      setResult("⚠️ Unable to reach the fact-check AI right now. Make sure the server is running and the Gemini API key is valid, then try again.");
     } finally {
       setLoading(false);
     }
@@ -329,12 +330,12 @@ function VotingGuide() {
         A Step-by-Step Guide for Citizens
       </p>
 
-      {/* Embedded Auto-playing Video Guide */}
+      {/* Embedded Video Guide */}
       <div style={{ marginBottom: "var(--space-6)", borderRadius: "var(--radius-lg)", overflow: "hidden", position: "relative", paddingBottom: "56.25%", height: 0, background: "#000" }}>
         <iframe
-          src="https://www.youtube.com/embed/XGJQNKFYqYI?si=Wp_7v6O3O_6L8K9S&amp;autoplay=1&amp;mute=1"
+          src="https://www.youtube.com/embed/XGJQNKFYqYI?rel=0&modestbranding=1"
           title="Official ECI Voting Procedure"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
           style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
         />

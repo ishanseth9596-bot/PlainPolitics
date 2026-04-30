@@ -105,18 +105,25 @@ app.use((err, _req, res, _next) => {
 const start = async () => {
   try {
     if (process.env.MONGO_URI) {
-      await mongoose.connect(process.env.MONGO_URI);
-      console.log("✅ MongoDB connected");
+      await mongoose.connect(process.env.MONGO_URI, {
+        serverSelectionTimeoutMS: 5000,
+      });
+      console.log("✅ MongoDB connected successfully");
     } else {
-      console.warn("⚠️  MONGO_URI not set – running without DB");
+      console.warn("⚠️  MONGO_URI not set – RUNNING IN DEMO MODE (Local Data Only)");
     }
-    app.listen(PORT, () =>
-      console.log(`🚀 Server running on http://localhost:${PORT}`)
-    );
   } catch (err) {
-    console.error("❌ Startup error:", err.message);
-    process.exit(1);
+    console.error("❌ MongoDB Connection Error:", err.message);
+    console.warn("⚠️  Falling back to DEMO MODE...");
   }
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server active on port ${PORT}`);
+    console.log(`🌐 Environment: ${process.env.NODE_ENV || "development"}`);
+    if (mongoose.connection.readyState !== 1) {
+      console.log("🛠️  Mode: DEMO (No database connection)");
+    }
+  });
 };
 
 start();

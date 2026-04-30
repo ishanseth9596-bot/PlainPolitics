@@ -232,8 +232,9 @@ function DepolGuide() {
     try {
       const { data } = await getDepolarisationAdvice(concern);
       setAdvice(data.advice);
-    } catch {
-      setAdvice("1. Focus on one local issue you both care about — a broken street light, a park that needs cleaning.\n2. Share a meal or tea, and agree to only talk about your neighbourhood for one hour.\n3. Remember: the person across the table is your neighbour first, a voter second.");
+    } catch (err) {
+      console.error("De-polar API error:", err);
+      setAdvice("⚠️ Unable to reach the AI right now. Please check that the server is running and the Gemini API key is valid, then try again.");
     } finally {
       setLoading(false);
     }

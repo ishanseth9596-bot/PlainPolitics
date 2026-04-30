@@ -29,8 +29,10 @@ if (useVertexAI) {
 }
 
 // ── Gemini REST (local dev with API key) ────────────────────────────────────
-const GEMINI_REST_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+// gemini-2.5-flash-lite: confirmed working on free-tier API keys (200 OK).
+// gemini-1.5-flash → 404 (deprecated), gemini-2.0-flash → 429 (quota exhausted on free tier).
+const GEMINI_MODEL = "gemini-2.5-flash-lite";
+const GEMINI_REST_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 async function callGeminiRest(prompt, systemInstruction) {
   const body = {
@@ -50,7 +52,11 @@ async function callGeminiRest(prompt, systemInstruction) {
     `${GEMINI_REST_URL}?key=${process.env.GEMINI_API_KEY}`,
     { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }
   );
-  if (!res.ok) throw new Error(`Gemini REST error ${res.status}: ${await res.text()}`);
+  if (!res.ok) {
+    const errBody = await res.text();
+    console.error(`❌ Gemini REST error ${res.status}:`, errBody);
+    throw new Error(`Gemini REST error ${res.status}: ${errBody}`);
+  }
   const data = await res.json();
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "No response.";
 }
@@ -141,7 +147,13 @@ Keep it calm and under 100 words.`,
 /** Generate de-polarisation advice. */
 export const getDepolarisationAdvice = (concern) =>
   askGemini(`
-You are a community peacebuilding advisor. A voter says: "${concern}".
-Give them 3 short, actionable tips to rebuild community relationships after a divisive election.
-Focus on shared local goals, not national politics. Keep it warm and under 150 words.
-`);
+You are a community peacebuilding advisor for PlainPolitics.
+A voter is experiencing this specific situation: "${concern}"
+
+Respond ONLY to this exact situation. Do NOT give generic advice.
+Give exactly 3 short, uniquely tailored, actionable tips to help them rebuild relationships.
+Format as: 1. ... 2. ... 3. ...
+Focus on shared local goals, not national politics. Keep it warm, empathetic, and under 150 words.
+Do NOT start with a preamble — go straight to the numbered tips.
+`, `You are a warm, empathetic community advisor. Each answer must be specific to the user's described situation.`);
+
