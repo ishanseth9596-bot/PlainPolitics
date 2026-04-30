@@ -131,7 +131,16 @@ export default function VoterRegistrationHub() {
         </p>
       </div>
 
-      {/* ── Vertical Stepper ── */}
+      {/* Embedded Video Guide (Registration) */}
+      <div style={{ marginBottom: "var(--space-6)", borderRadius: "var(--radius-lg)", overflow: "hidden", position: "relative", paddingBottom: "56.25%", height: 0, background: "#000" }}>
+        <iframe
+          src="https://www.youtube.com/embed/R_I_f_WlYqI"
+          title="How to Register to Vote"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
+        />
+      </div>
       <div style={{ marginBottom: "var(--space-7)" }}>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: 700, marginBottom: "var(--space-4)", color: "#111" }}>
           Step-by-Step Registration Guide
