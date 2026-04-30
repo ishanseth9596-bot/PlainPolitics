@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node --watch index.js",
     "start": "node index.js",
-    "test": "node --test test/"
+    "test": "node --test"
   },
   "dependencies": {
     "@google-cloud/vertexai": "^1.12.0",

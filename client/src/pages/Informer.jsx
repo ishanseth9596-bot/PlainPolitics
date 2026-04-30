@@ -38,6 +38,16 @@ const DEMO_CANDIDATES = [
   },
 ];
 
+const TABS = [
+  { id: "timeline",   label: "⏱️ Timeline" },
+  { id: "elections",  label: "🗳️ Elections" },
+  { id: "registration",label: "📝 Voter ID Hub" },
+  { id: "ready",      label: "✅ Am I Ready?" },
+  { id: "candidates", label: "📋 Candidates"  },
+  { id: "guide",      label: "📘 Voting Guide" },
+  { id: "mythbuster", label: "🔍 Myth-Buster" },
+];
+
 // ── Registration Checker ───────────────────────────────────────────────────
 function RegistrationChecker() {
   const [name, setName] = useState("");
@@ -391,17 +401,6 @@ function VotingGuide() {
 export default function Informer() {
   const [activeTab, setActiveTab] = useState("timeline");
 
-  const tabs = [
-    { id: "timeline",   label: "⏱️ Timeline" },
-    { id: "elections",  label: "🗳️ Elections" },
-    { id: "registration",label: "📝 Voter ID Hub" },
-    { id: "ready",      label: "✅ Am I Ready?" },
-    { id: "candidates", label: "📋 Candidates"  },
-    { id: "guide",      label: "📘 Voting Guide" },
-    { id: "mythbuster", label: "🔍 Myth-Buster" },
-
-  ];
-
   return (
     <div className="section">
       <div className="container">
@@ -412,7 +411,7 @@ export default function Informer() {
         </div>
 
         <div className="tabs">
-          {tabs.map((t) => (
+          {TABS.map((t) => (
             <button
               key={t.id}
               id={`tab-${t.id}`}

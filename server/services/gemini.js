@@ -1,5 +1,4 @@
 import { VertexAI } from "@google-cloud/vertexai";
-import fetch from "node-fetch";
 
 // ── Choose backend: Vertex AI (Cloud Run) or REST API key (local dev) ──────
 const useVertexAI =
@@ -29,10 +28,11 @@ if (useVertexAI) {
 }
 
 // ── Gemini REST (local dev with API key) ────────────────────────────────────
-// gemini-2.5-flash-lite: confirmed working on free-tier API keys (200 OK).
-// gemini-1.5-flash → 404 (deprecated), gemini-2.0-flash → 429 (quota exhausted on free tier).
 const GEMINI_MODEL = "gemini-2.5-flash-lite";
 const GEMINI_REST_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+// Use global fetch (Node 18+) or a mock if provided
+const getFetch = () => (typeof globalThis.mockFetch === "function" ? globalThis.mockFetch : fetch);
 
 async function callGeminiRest(prompt, systemInstruction) {
   const body = {
@@ -48,7 +48,8 @@ async function callGeminiRest(prompt, systemInstruction) {
     body.system_instruction = { parts: [{ text: systemInstruction }] };
   }
 
-  const res = await fetch(
+  const currentFetch = getFetch();
+  const res = await currentFetch(
     `${GEMINI_REST_URL}?key=${process.env.GEMINI_API_KEY}`,
     { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }
   );
@@ -74,27 +75,50 @@ async function callVertexAI(prompt, systemInstruction) {
   return response.candidates?.[0]?.content?.parts?.[0]?.text ?? "No response.";
 }
 
+// ── Cache for static/repeated guidance ──────────────────────────────────────
+const guidanceCache = new Map();
+
 // ── Public API ──────────────────────────────────────────────────────────────
 /**
  * Send a prompt to Gemini and return the text response.
  * Automatically uses Vertex AI on Cloud Run, REST API key locally.
  */
 export const askGemini = async (prompt, systemInstruction = "") => {
+  const cacheKey = `${systemInstruction}:${prompt}`;
+  if (guidanceCache.has(cacheKey)) {
+    return guidanceCache.get(cacheKey);
+  }
+
+  let result;
   // Try Vertex AI first if configured
   if (useVertexAI) {
     try {
-      return await callVertexAI(prompt, systemInstruction);
+      result = await callVertexAI(prompt, systemInstruction);
     } catch (err) {
       console.warn("⚠️ Vertex AI failed, falling back to REST API:", err.message);
       // Fall through to REST fallback
     }
   }
 
-  // Fallback to REST API key
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("Set GEMINI_API_KEY (local) or ensure Vertex AI is enabled (Cloud Run).");
+  // Fallback to REST API key if Vertex AI failed or was not configured
+  if (!result) {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("Set GEMINI_API_KEY (local) or ensure Vertex AI is enabled (Cloud Run).");
+    }
+    result = await callGeminiRest(prompt, systemInstruction);
   }
-  return callGeminiRest(prompt, systemInstruction);
+
+  // Cache responses that are likely to be reused (under 500 chars)
+  if (result && result.length < 1000) {
+    guidanceCache.set(cacheKey, result);
+    // Limit cache size
+    if (guidanceCache.size > 100) {
+      const firstKey = guidanceCache.keys().next().value;
+      guidanceCache.delete(firstKey);
+    }
+  }
+
+  return result;
 };
 
 /** Summarise a candidate manifesto into bullet points. */

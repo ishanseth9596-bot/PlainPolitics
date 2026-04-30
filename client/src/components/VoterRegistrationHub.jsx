@@ -1,6 +1,77 @@
 import { useState } from "react";
 import Spinner from "./Spinner";
 
+const STEPS = [
+  { 
+    step: "01", 
+    title: "Understand Your Eligibility", 
+    descPreview: "First things first, let's make sure you're ready to vote! You need to be an Indian citizen, at least 18 years old by January 1st of the year the voter list is revised.", 
+    when: "Ongoing",
+    why: "This is the first step to ensure you are eligible to become a voter in India.",
+    tip: "The qualifying date of January 1st means if you turn 18 on or before that date, you can register in that year's revision.",
+    link: null
+  },
+  { 
+    step: "02", 
+    title: "Gather Your Documents", 
+    descPreview: "Gathering your documents beforehand is like preparing your ingredients before cooking – it makes the whole process much smoother and faster!", 
+    when: "Before applying",
+    why: "Valid Identity and Address proof (like Aadhaar, PAN, Passport) are mandatory for verification.",
+    tip: "Ensure your documents are clear and readable before uploading. Blurry photos often lead to rejection.",
+    link: null
+  },
+  { 
+    step: "03", 
+    title: "Register to Vote (Fill Form 6)", 
+    descPreview: "This is the most exciting and important step – officially becoming a voter! As a first-timer, you'll fill out 'Form 6'. The easiest way to do this is online.", 
+    when: "Anytime",
+    why: "This legally adds your name to the electoral roll so you can cast your vote.",
+    tip: "Use the Voter Helpline App or the official NVSP portal for the fastest processing.",
+    link: { text: "Go to Voter Portal 🔗", url: "https://voters.eci.gov.in/" } 
+  },
+  { 
+    step: "04", 
+    title: "Field Verification (BLO Visit)", 
+    descPreview: "A Booth Level Officer (BLO) will visit your registered address to verify the details you submitted.", 
+    when: "1-2 weeks after applying",
+    why: "Ensures that the address and identity provided are genuine to prevent fraudulent voting.",
+    tip: "Keep your original documents handy to show the BLO when they visit.",
+    link: null
+  },
+  { 
+    step: "05", 
+    title: "EPIC Card Generation", 
+    descPreview: "Success! Your Voter ID (EPIC card) is generated and will be delivered via Speed Post to your address.", 
+    when: "3-4 weeks after verification",
+    why: "Your EPIC card is your official proof of being a registered voter.",
+    tip: "You can download the digital version (e-EPIC) from the portal as soon as it's generated, even before the physical card arrives.",
+    link: { text: "Track Application 🔗", url: "https://voters.eci.gov.in/" } 
+  },
+];
+
+const HELP_DESK = [
+  { 
+    problem: "1. Name missing from the roll despite having a card.", 
+    solution: "Verify status on the NVSP portal 1 month early and keep a screenshot of the registration.",
+    link: { text: "Search in Electoral Roll 🔗", url: "https://electoralsearch.eci.gov.in/" }
+  },
+  { 
+    problem: "2. Data typos/errors on the Voter ID.", 
+    solution: "Fill Form 8 on the NVSP portal for corrections.",
+    link: { text: "Apply for Correction (Form 8) 🔗", url: "https://voters.eci.gov.in/" }
+  },
+  { 
+    problem: "3. Moved to a new city or address changed.", 
+    solution: "You cannot vote at your old address if you've permanently moved. Submit Form 8 to shift your residence within or outside your constituency.",
+    link: { text: "Apply for Shifting (Form 8) 🔗", url: "https://voters.eci.gov.in/" }
+  },
+  { 
+    problem: "4. Voter ID is lost, damaged, or stolen.", 
+    solution: "You do not need to register again. You can apply for a duplicate replacement EPIC card using Form 8.",
+    link: { text: "Request Replacement EPIC 🔗", url: "https://voters.eci.gov.in/" }
+  }
+];
+
 export default function VoterRegistrationHub() {
   const [refNumber, setRefNumber] = useState("");
   const [trackingStatus, setTrackingStatus] = useState(null);
@@ -21,7 +92,7 @@ export default function VoterRegistrationHub() {
     newSet.add(idx);
     setCompletedSteps(newSet);
     // Auto expand next step
-    if (idx + 1 < steps.length) {
+    if (idx + 1 < STEPS.length) {
       setExpandedStep(idx + 1);
     } else {
       setExpandedStep(null);
@@ -48,77 +119,6 @@ export default function VoterRegistrationHub() {
   const toggleAccordion = (idx) => {
     setOpenAccordion(openAccordion === idx ? null : idx);
   };
-
-  const steps = [
-    { 
-      step: "01", 
-      title: "Understand Your Eligibility", 
-      descPreview: "First things first, let's make sure you're ready to vote! You need to be an Indian citizen, at least 18 years old by January 1st of the year the voter list is revised.", 
-      when: "Ongoing",
-      why: "This is the first step to ensure you are eligible to become a voter in India.",
-      tip: "The qualifying date of January 1st means if you turn 18 on or before that date, you can register in that year's revision.",
-      link: null
-    },
-    { 
-      step: "02", 
-      title: "Gather Your Documents", 
-      descPreview: "Gathering your documents beforehand is like preparing your ingredients before cooking – it makes the whole process much smoother and faster!", 
-      when: "Before applying",
-      why: "Valid Identity and Address proof (like Aadhaar, PAN, Passport) are mandatory for verification.",
-      tip: "Ensure your documents are clear and readable before uploading. Blurry photos often lead to rejection.",
-      link: null
-    },
-    { 
-      step: "03", 
-      title: "Register to Vote (Fill Form 6)", 
-      descPreview: "This is the most exciting and important step – officially becoming a voter! As a first-timer, you'll fill out 'Form 6'. The easiest way to do this is online.", 
-      when: "Anytime",
-      why: "This legally adds your name to the electoral roll so you can cast your vote.",
-      tip: "Use the Voter Helpline App or the official NVSP portal for the fastest processing.",
-      link: { text: "Go to Voter Portal 🔗", url: "https://voters.eci.gov.in/" } 
-    },
-    { 
-      step: "04", 
-      title: "Field Verification (BLO Visit)", 
-      descPreview: "A Booth Level Officer (BLO) will visit your registered address to verify the details you submitted.", 
-      when: "1-2 weeks after applying",
-      why: "Ensures that the address and identity provided are genuine to prevent fraudulent voting.",
-      tip: "Keep your original documents handy to show the BLO when they visit.",
-      link: null
-    },
-    { 
-      step: "05", 
-      title: "EPIC Card Generation", 
-      descPreview: "Success! Your Voter ID (EPIC card) is generated and will be delivered via Speed Post to your address.", 
-      when: "3-4 weeks after verification",
-      why: "Your EPIC card is your official proof of being a registered voter.",
-      tip: "You can download the digital version (e-EPIC) from the portal as soon as it's generated, even before the physical card arrives.",
-      link: { text: "Track Application 🔗", url: "https://voters.eci.gov.in/" } 
-    },
-  ];
-
-  const helpDesk = [
-    { 
-      problem: "1. Name missing from the roll despite having a card.", 
-      solution: "Verify status on the NVSP portal 1 month early and keep a screenshot of the registration.",
-      link: { text: "Search in Electoral Roll 🔗", url: "https://electoralsearch.eci.gov.in/" }
-    },
-    { 
-      problem: "2. Data typos/errors on the Voter ID.", 
-      solution: "Fill Form 8 on the NVSP portal for corrections.",
-      link: { text: "Apply for Correction (Form 8) 🔗", url: "https://voters.eci.gov.in/" }
-    },
-    { 
-      problem: "3. Moved to a new city or address changed.", 
-      solution: "You cannot vote at your old address if you've permanently moved. Submit Form 8 to shift your residence within or outside your constituency.",
-      link: { text: "Apply for Shifting (Form 8) 🔗", url: "https://voters.eci.gov.in/" }
-    },
-    { 
-      problem: "4. Voter ID is lost, damaged, or stolen.", 
-      solution: "You do not need to register again. You can apply for a duplicate replacement EPIC card using Form 8.",
-      link: { text: "Request Replacement EPIC 🔗", url: "https://voters.eci.gov.in/" }
-    }
-  ];
 
   return (
     <div className="card fade-in" style={{ maxWidth: "800px", margin: "0 auto" }}>
@@ -149,7 +149,7 @@ export default function VoterRegistrationHub() {
           {/* Vertical Line */}
           <div style={{ position: "absolute", left: "9px", top: "24px", bottom: "40px", width: "2px", background: "rgba(0,0,0,0.08)", zIndex: 0 }}></div>
           
-          {steps.map((s, idx) => {
+          {STEPS.map((s, idx) => {
             const isExpanded = expandedStep === idx;
             const isCompleted = completedSteps.has(idx);
             return (
@@ -274,7 +274,7 @@ export default function VoterRegistrationHub() {
             Help Desk
           </h3>
           <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
-            {helpDesk.map((item, idx) => (
+            {HELP_DESK.map((item, idx) => (
               <div key={idx} style={{ background: "#fff", borderRadius: "var(--radius-md)", border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden" }}>
                 <button 
                   onClick={() => toggleAccordion(idx)}

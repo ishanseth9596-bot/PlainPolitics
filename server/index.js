@@ -102,7 +102,7 @@ app.use((err, _req, res, _next) => {
 });
 
 // ── Database + start ──────────────────────────────────────────────────────────
-const start = async () => {
+export const start = async () => {
   try {
     if (process.env.MONGO_URI) {
       await mongoose.connect(process.env.MONGO_URI, {
@@ -117,13 +117,19 @@ const start = async () => {
     console.warn("⚠️  Falling back to DEMO MODE...");
   }
 
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`🚀 Server active on port ${PORT}`);
     console.log(`🌐 Environment: ${process.env.NODE_ENV || "development"}`);
     if (mongoose.connection.readyState !== 1) {
       console.log("🛠️  Mode: DEMO (No database connection)");
     }
   });
+  return server;
 };
 
-start();
+// Only start automatically if run directly
+if (process.argv[1] && (process.argv[1].endsWith("index.js") || process.argv[1].endsWith("server"))) {
+  start();
+}
+
+export default app;
