@@ -14,6 +14,13 @@ substitutions:
   _PROJECT: ${PROJECT_ID}
 
 steps:
+  # ── Run CI Tests ─────────────────────────────────────────────────────────
+  - name: "node:18"
+    id: test
+    entrypoint: npm
+    args: ["run", "test:ci"]
+    dir: "server"
+
   # ── Build the Docker image ───────────────────────────────────────────────
   - name: "gcr.io/cloud-builders/docker"
     id: build

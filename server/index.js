@@ -13,6 +13,11 @@ import informerRoutes from "./routes/informer.js";
 import reporterRoutes from "./routes/reporter.js";
 import trackerRoutes from "./routes/tracker.js";
 import aiRoutes from "./routes/ai.js";
+import analyticsRoutes from "./routes/analytics.js";
+import feedbackRoutes from "./routes/feedback.js";
+import globalErrorHandler from "./middleware/globalErrorHandler.js";
+import { errorResponse } from "./utils/responseHelper.js";
+import crypto from "crypto";
 
 // __dirname equivalent for ESM
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -21,6 +26,13 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Add unique Request ID to every request
+app.use((req, res, next) => {
+  const requestId = req.headers["x-request-id"] || crypto.randomUUID();
+  res.setHeader("x-request-id", requestId);
+  next();
+});
 
 // ── Security middleware ────────────────────────────────────────────────────────
 app.use(
@@ -68,6 +80,8 @@ app.use("/api/informer", informerRoutes);
 app.use("/api/reporter", reporterRoutes);
 app.use("/api/tracker", trackerRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/feedback", feedbackRoutes);
 
 // ── Serve React build (production / Cloud Run) ───────────────────────────────
 let clientBuild = path.join(__dirname, "../client/dist");
@@ -85,21 +99,17 @@ if (!fs.existsSync(path.join(clientBuild, "index.html"))) {
 
 app.use(express.static(clientBuild));
 // React Router catch-all — must come AFTER all API routes
-app.get("*", (_req, res) =>
+app.get("*", (req, res) =>
   res.sendFile(path.join(clientBuild, "index.html"), (err) => {
     // Fall back to JSON 404 if no build exists (local dev)
-    if (err) res.status(404).json({ error: "Route not found." });
+    if (err) {
+      errorResponse(res, 404, "ROUTE_NOT_FOUND", "The requested page or API route does not exist.");
+    }
   })
 );
 
 // ── Global error handler ──────────────────────────────────────────────────────
-// eslint-disable-next-line no-unused-vars
-app.use((err, _req, res, _next) => {
-  console.error(err.stack);
-  res
-    .status(err.status || 500)
-    .json({ error: err.message || "Internal server error." });
-});
+app.use(globalErrorHandler);
 
 // ── Database + start ──────────────────────────────────────────────────────────
 export const start = async () => {

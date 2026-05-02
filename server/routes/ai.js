@@ -1,6 +1,10 @@
 import express from "express";
 import { body, validationResult } from "express-validator";
 import { askGemini } from "../services/gemini.js";
+import { successResponse, errorResponse } from "../utils/responseHelper.js";
+import { promptInjectionGuard } from "../middleware/promptInjectionGuard.js";
+import { analyzeCivicIntent } from "../services/language.js";
+import { logQueryToBigQuery } from "../services/analytics.js";
 
 const router = express.Router();
 
@@ -14,21 +18,40 @@ Keep answers short, clear, and jargon-free.
 const validate = (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(422).json({ errors: errors.array() });
+    errorResponse(res, 422, "VALIDATION_ERROR", "Invalid request parameters.", errors.array());
     return false;
   }
   return true;
 };
 
-// POST /api/ai/ask  – general civic Q&A
+/**
+ * POST /api/ai/ask
+ * @summary Ask a civic question to Gemini AI
+ * @param {string} question - The user's question (max 500 chars)
+ * @returns {object} Standardized response with answer
+ */
 router.post(
   "/ask",
-  [body("question").isString().notEmpty().isLength({ max: 500 })],
+  [
+    body("question").isString().notEmpty().isLength({ max: 500 }),
+    promptInjectionGuard
+  ],
   async (req, res, next) => {
     if (!validate(req, res)) return;
     try {
-      const answer = await askGemini(req.body.question, SYSTEM_INSTRUCTION);
-      res.json({ question: req.body.question, answer });
+      const { question } = req.body;
+
+      // 1. Preprocess with Natural Language API (Enriched Context)
+      const intent = await analyzeCivicIntent(question);
+      
+      // 2. Query Gemini with enriched prompt
+      const enrichedPrompt = `User question: ${question}\nDetected Entities: ${intent.entities?.join(", ") || "None"}`;
+      const answer = await askGemini(enrichedPrompt, SYSTEM_INSTRUCTION);
+
+      // 3. Log to BigQuery for analytics (fire and forget)
+      logQueryToBigQuery(question, intent.entities);
+
+      successResponse(res, { question, answer, intent });
     } catch (err) {
       next(err);
     }

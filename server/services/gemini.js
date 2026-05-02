@@ -82,6 +82,11 @@ const guidanceCache = new Map();
 /**
  * Send a prompt to Gemini and return the text response.
  * Automatically uses Vertex AI on Cloud Run, REST API key locally.
+ * 
+ * @param {string} prompt - The user query or task description.
+ * @param {string} [systemInstruction=""] - Contextual guardrails or persona for the AI.
+ * @returns {Promise<string>} The generated text response.
+ * @throws {Error} If no API key is provided and Vertex AI is unavailable.
  */
 export const askGemini = async (prompt, systemInstruction = "") => {
   const cacheKey = `${systemInstruction}:${prompt}`;
@@ -108,7 +113,7 @@ export const askGemini = async (prompt, systemInstruction = "") => {
     result = await callGeminiRest(prompt, systemInstruction);
   }
 
-  // Cache responses that are likely to be reused (under 500 chars)
+  // Cache responses that are likely to be reused (under 1000 chars)
   if (result && result.length < 1000) {
     guidanceCache.set(cacheKey, result);
     // Limit cache size
@@ -121,7 +126,11 @@ export const askGemini = async (prompt, systemInstruction = "") => {
   return result;
 };
 
-/** Summarise a candidate manifesto into bullet points. */
+/** 
+ * Summarise a candidate manifesto into bullet points. 
+ * @param {object} candidate - The candidate object containing manifesto array.
+ * @returns {Promise<string>} Bulleted summary.
+ */
 export const summariseManifesto = (candidate) => {
   const promises = candidate.manifesto
     .map((p) => `- [${p.category}] ${p.promise}: ${p.detail}`)
@@ -137,7 +146,11 @@ ${promises}
 `);
 };
 
-/** Fact-check a claim using Gemini. */
+/** 
+ * Fact-check a claim using Gemini. 
+ * @param {string} claim - The claim to verify.
+ * @returns {Promise<string>} Verdict and explanation.
+ */
 export const factCheck = (claim) =>
   askGemini(`
 You are a fact-checking assistant. A voter is asking whether the following claim about an election is true or false.

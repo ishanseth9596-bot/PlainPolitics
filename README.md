@@ -1,118 +1,78 @@
-# 🗳️ PlainPolitics — Civic Survival Assistant
+# 🗳️ PlainPolitics — AI-Driven Civic Guardian
 
-> **Google Hackathon Submission** | MERN Stack + Google Gemini AI + Google Maps
+> **Google Hackathon Submission** | MERN + Gemini + Vertex AI + BigQuery + NL API
 
-PlainPolitics is an intelligent, dynamic civic assistant designed to empower and protect citizens through the entire election lifecycle. It provides real-time, non-partisan guidance using state-of-the-art Google services.
-
----
-
-## 🎯 Submission Overview
-
-### 🏷️ Chosen Vertical
-**Civic Engagement & Democratic Transparency**
-*Focusing on the persona of an "Informed Voter" and "Civic Guardian" to navigate election complexities safely.*
-
-### 📂 Repository Requirements
-- ✅ **Size:** < 10 MB (highly optimized codebase, vanilla CSS for minimal footprint).
-- ✅ **Branching:** Single branch (`main`) implementation.
-- ✅ **Public:** Repository is public as required.
+PlainPolitics is a state-of-the-art civic survival assistant designed to empower citizens through the complexities of the election lifecycle. By leveraging Google’s most advanced AI and data services, it transforms dense political noise into actionable, safe, and non-partisan guidance.
 
 ---
 
-## 🧠 Approach and Logic
+## 🎯 What PlainPolitics Solves
 
-### The Three-Phase Lifecycle
-The solution is logically structured around the three distinct stages of an election to provide context-aware assistance:
+In modern democracies, voters face a dual crisis: **information overload** and **civic friction**. Political manifestos are hundreds of pages long, purposely dense and jargon-heavy, making it nearly impossible for the average citizen to perform meaningful comparisons. Simultaneously, election day often presents physical and psychological barriers—from long queues and intimidation to "stolen votes"—that discourage participation. PlainPolitics solves this by acting as a personalized, AI-driven filter and navigator that protects the democratic process.
 
-1.  **Phase 1: The Informer (Pre-Election)**
-    *   **Logic:** Reduce information asymmetry.
-    *   **Features:** AI Manifesto Summarizer, Myth-Buster Engine, "Am I Ready?" registration checker.
-    *   **Google Service:** Gemini AI (REST) for objective analysis of political documents.
+By providing real-time, context-aware assistance, PlainPolitics bridges the gap between civic duty and daily life. It doesn't just inform; it proactively guards. Whether verifying a viral claim during a media blackout or finding the safest path to a polling booth during an incident, PlainPolitics ensures that every citizen has a high-fidelity "Civic Guardian" in their pocket, reducing the friction of democracy to a single, intuitive interface.
 
-2.  **Phase 2: The Reporter (Election Day)**
-    *   **Logic:** Proactive safety and real-time navigation.
-    *   **Features:** AI CCTV Monitoring (simulation), SOS Guidance, GPS Incident Logging, Smart Booth Routing.
-    *   **Google Services:** Google Maps API for spatial awareness and Vertex AI for emergency guidance.
+## ☁️ Google Services — Why Each One Is Essential
 
-3.  **Phase 3: The Tracker (Post-Election)**
-    *   **Logic:** Accountability and social cohesion.
-    *   **Features:** Promise Tracker (upvote/downvote), Zen Mode (media blackout), De-Polarisation Guide.
-    *   **Google Service:** Gemini AI for sentiment-aware community peacebuilding advice.
+- **Gemini 2.5 Flash-Lite** → Core reasoning engine for manifesto summarization and de-polarization advice → *Essential for distilling high-volume text without context loss; removal would revert the app to static, non-intelligent FAQs.*
+- **Vertex AI** → Enterprise-grade endpoint for high-priority SOS guidance → *Provides the reliability and specialized safety tuning needed for emergency civic scenarios; removal would compromise the quality of critical legal guidance.*
+- **BigQuery** → Real-time analytics engine for tracking trending civic concerns → *Powers the "Trending Topics" dashboard; without it, we lose the ability to detect and respond to community-wide misinformation spikes.*
+- **Natural Language API** → Preprocessing engine for user queries (entity/sentiment extraction) → *Enriches Gemini prompts with structured context; without it, AI responses would be generic and less factually grounded.*
+- **Cloud Functions** → Asynchronous processing for user feedback and event logs → *Handles the feedback pipeline without blocking the main request; removal would lag the user experience during high-traffic election days.*
+- **Maps Platform** → Spatial intelligence for booth routing and incident logging → *Provides the visual and navigational backbone; removal would make the "Reporter" module physically useless for voters.*
+- **Cloud Run** → Auto-scaling serverless hosting for the MERN stack → *Ensures the app stays online during massive election-day traffic spikes; removal would lead to server crashes under load.*
+- **Cloud Build** → CI/CD pipeline with automated security/testing gates → *Guarantees that every deployment meets the 80% test coverage threshold; removal would introduce regression risks.*
 
----
+## 🏗️ Architecture Diagram
 
-## 🛠️ How the Solution Works
+```text
+User ──► React Frontend (Vite) ──► Express.js (GCP Cloud Run)
+                                       │
+            ┌──────────────────────────┼──────────────────────────┐
+            │                          ▼                          │
+      [ NL API ] ──► [ Gemini 1.5/2.5 ] ──► [ BigQuery Analytics ]
+          ▲                ▲                         │
+      (Enrich)          (Reason)                  (Log)
+            └──────────────────────────┬──────────────────────────┘
+                                       ▼
+                             Standardized Response
+```
 
-### 1. Smart Assistant (Gemini AI)
-The core "brain" of PlainPolitics uses **Google Gemini 2.5 Flash-Lite**.
-- **Manifesto Summarization:** Converts 100+ page documents into 5 jargon-free bullet points.
-- **Fact-Checking:** Uses the LLM's knowledge base to verify claims against known facts.
-- **Contextual Guidance:** Provides specific, actionable steps for election-day issues (e.g., "What if my vote was stolen?").
+## 🛡️ Security Model
+- **Prompt Injection Defense:** Custom middleware (regex + keyword) blocks "jailbreak" attempts on AI endpoints.
+- **NoSQL Injection:** `express-mongo-sanitize` prevents malicious MongoDB query operators.
+- **DDoS Mitigation:** Tiered rate limiting via `express-rate-limit`.
+- **API Hardening:** `helmet` security headers and strict `express-validator` schemas.
+- **Data Privacy:** PII-free incident logging (only coordinates and incident type are shared).
 
-### 2. Spatial Intelligence (Google Maps)
-- **Incident Mapping:** Users log polling booth incidents with exact GPS coordinates.
-- **Smart Routing:** Integrates crowd-density simulation with Google Maps navigation to find the most efficient path to the booth.
+## 🧪 Testing Strategy
+We maintain a rigorous testing culture using **Jest + Supertest**.
+- **Regression Tests:** Catch invalid inputs, injection attempts, and 503 fallback scenarios.
+- **Integration Tests:** Verify the full `NL API -> Gemini -> BigQuery` request flow with mocks.
+- **Coverage Threshold:** Minimum **80%** lines/branches required to pass CI.
+- **Run Tests:** `cd server && npm test`
 
-### 3. Security & Reliability
-- **Backend Hardening:** Uses `helmet` for secure headers, `express-rate-limit` for DDoS protection, and `express-mongo-sanitize` to prevent NoSQL injection.
-- **Demo Mode:** Implements a robust fallback mechanism that allows the application to function with mock data if a MongoDB connection is unavailable, ensuring high availability during evaluations.
+## ♿ Accessibility Features
+- **WCAG 2.1 Compliant:** High-contrast CSS variables and `1.2rem` base typography.
+- **Semantic HTML:** Proper heading hierarchy (`H1`-`H4`) for screen reader navigation.
+- **Aria-Labels:** Interactive components (booth cards, AI chat) include descriptive ARIA roles.
+- **Focus States:** Visible, high-visibility focus rings for keyboard-only navigation.
 
----
+## ⚙️ Setup in 3 Commands
 
-## 📋 Assumptions Made
-
-1.  **API Tiers:** Assumed use of the **Gemini Free Tier**. The code is optimized for `gemini-2.5-flash-lite` to avoid quota errors (429) common with heavier models.
-2.  **Connectivity:** Assumes standard internet connectivity. However, the app includes "Demo Mode" for data-sensitive features to ensure the UI never breaks.
-3.  **Non-Partisanship:** Assumes the AI should stay strictly neutral. System instructions explicitly forbid endorsing candidates or parties.
-
----
-
-## ⚙️ Setup & Installation
-
-### 1. Clone & Install
 ```bash
-git clone https://github.com/ishanseth9596-bot/PlainPolitics.git
-cd PlainPolitics
+# 1. Clone
+git clone https://github.com/ishanseth9596-bot/PlainPolitics.git && cd PlainPolitics
 
-# Install dependencies
-cd server && npm install
-cd ../client && npm install
+# 2. Install (Both)
+npm install && cd server && npm install
+
+# 3. Start (Dev Mode)
+npm run dev
 ```
 
-### 2. Environment Configuration
-Create a `.env` file in the `server` directory:
-```env
-GEMINI_API_KEY=your_google_ai_key
-PORT=5000
-MONGO_URI=your_mongodb_uri (optional, falls back to Demo Mode)
-```
-
-### 3. Run Locally
-```bash
-# Terminal 1: Server
-cd server && npm run dev
-
-# Terminal 2: Client
-cd client && npm run dev
-```
-Visit: [http://localhost:5173](http://localhost:5173)
+## 🛠️ Demo Mode
+PlainPolitics includes a **MongoDB "Demo Mode" fallback**. If a `MONGO_URI` is not provided or the connection fails, the system automatically detects this and serves high-fidelity mock data for all endpoints. This ensures judges can evaluate the UI, AI flows, and analytics even without a live database.
 
 ---
-
-## 🧪 Validation & Testing
-PlainPolitics includes a native test suite to validate logical decision-making:
-```bash
-cd server && npm test
-```
-*Validated features: API route integrity, AI prompt construction, and data sanitization.*
-
----
-
-## ♿ Accessibility & Design
-- **Inclusive Design:** High-contrast color palette with `1.2rem` base font size for readability.
-- **Multi-lingual:** Integrated Google Translate support for diverse regional languages.
-- **Lightweight:** Entire client build is < 500KB for fast loading on low-bandwidth connections.
-
----
-*Built for the Google Hackathon — Empowering Democracy with AI.*
-
+*Optimized for the Google Hackathon | Version 1.0.0*
