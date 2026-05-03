@@ -172,8 +172,8 @@ function CandidateCard({ candidate }) {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await summariseManifesto(candidate._id);
-      setSummary(data.summary);
+      const { data: response } = await summariseManifesto(candidate._id);
+      setSummary(response.data.summary);
     } catch {
       // Fallback: build a simple summary from the manifesto data
       const fallback = candidate.manifesto
@@ -254,8 +254,8 @@ function MythBuster() {
     setLoading(true);
     setResult(null);
     try {
-      const { data } = await factCheck(claim);
-      setResult(data.result);
+      const { data: response } = await factCheck(claim);
+      setResult(response.data.result);
     } catch (err) {
       console.error("Myth-buster API error:", err);
       setResult("⚠️ Unable to reach the fact-check AI right now. Make sure the server is running and the Gemini API key is valid, then try again.");
@@ -343,7 +343,7 @@ function VotingGuide() {
       {/* Embedded Video Guide */}
       <div style={{ marginBottom: "var(--space-6)", borderRadius: "var(--radius-lg)", overflow: "hidden", position: "relative", paddingBottom: "56.25%", height: 0, background: "#000" }}>
         <iframe
-          src="https://www.youtube.com/embed/XGJQNKFYqYI?rel=0&modestbranding=1"
+          src="https://www.youtube.com/embed/W-A9X9r2m78?rel=0&modestbranding=1"
           title="Official ECI Voting Procedure"
           allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
@@ -352,7 +352,7 @@ function VotingGuide() {
       </div>
       <div style={{ textAlign: "center", marginBottom: "var(--space-6)" }}>
         <a 
-          href="https://www.youtube.com/watch?v=XGJQNKFYqYI" 
+          href="https://www.youtube.com/watch?v=W-A9X9r2m78" 
           target="_blank" 
           rel="noopener noreferrer"
           style={{ fontSize: "0.85rem", color: "#111", textDecoration: "underline", fontWeight: 600 }}

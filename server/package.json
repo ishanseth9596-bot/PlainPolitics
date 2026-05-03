@@ -9,9 +9,11 @@
     "start": "node index.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:ci": "jest --ci --coverage --maxWorkers=2",
+    "test:ci": "jest --ci --coverage --maxWorkers=2"
   },
   "dependencies": {
+    "@google-cloud/bigquery": "^7.9.0",
+    "@google-cloud/language": "^6.5.0",
     "@google-cloud/vertexai": "^1.12.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

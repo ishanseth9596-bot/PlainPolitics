@@ -3,13 +3,15 @@ import { body, validationResult } from "express-validator";
 import Incident from "../models/Incident.js";
 import CheckIn from "../models/CheckIn.js";
 import { getSosGuidance } from "../services/gemini.js";
+import { successResponse, errorResponse } from "../utils/responseHelper.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
 const validate = (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(422).json({ errors: errors.array() });
+    errorResponse(res, 422, "VALIDATION_ERROR", "Invalid input", errors.array());
     return false;
   }
   return true;
@@ -27,11 +29,14 @@ router.post(
   async (req, res, next) => {
     if (!validate(req, res)) return;
     try {
-      const incident = new Incident(req.body);
-      await incident.save();
+      let incident = null;
+      if (mongoose.connection.readyState === 1) {
+        incident = new Incident(req.body);
+        await incident.save();
+      }
       // Get AI guidance for this incident type
       const guidance = await getSosGuidance(req.body.type);
-      res.status(201).json({ incident, guidance });
+      successResponse(res, { incident, guidance }, 201);
     } catch (err) {
       next(err);
     }
@@ -41,11 +46,14 @@ router.post(
 // GET /api/reporter/incidents  – get recent incidents (no PII)
 router.get("/incidents", async (req, res, next) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return successResponse(res, []);
+    }
     const incidents = await Incident.find()
       .sort({ createdAt: -1 })
       .limit(50)
       .select("type location.lat location.lng boothId resolved createdAt");
-    res.json(incidents);
+    successResponse(res, incidents);
   } catch (err) {
     next(err);
   }
@@ -58,8 +66,8 @@ router.post(
   async (req, res, next) => {
     if (!validate(req, res)) return;
     try {
-      const guidance = await getSosGuidance(req.body.type);
-      res.json({ type: req.body.type, guidance });
+    const guidance = await getSosGuidance(req.body.type);
+    successResponse(res, { type: req.body.type, guidance });
     } catch (err) {
       next(err);
     }
@@ -77,9 +85,12 @@ router.post(
   async (req, res, next) => {
     if (!validate(req, res)) return;
     try {
-      const checkIn = new CheckIn(req.body);
-      await checkIn.save();
-      res.status(201).json(checkIn);
+      let checkIn = null;
+      if (mongoose.connection.readyState === 1) {
+        checkIn = new CheckIn(req.body);
+        await checkIn.save();
+      }
+      successResponse(res, checkIn, 201);
     } catch (err) {
       next(err);
     }

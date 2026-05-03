@@ -230,8 +230,8 @@ function DepolGuide() {
     setLoading(true);
     setAdvice(null);
     try {
-      const { data } = await getDepolarisationAdvice(concern);
-      setAdvice(data.advice);
+      const { data: response } = await getDepolarisationAdvice(concern);
+      setAdvice(response.data.advice);
     } catch (err) {
       console.error("De-polar API error:", err);
       setAdvice("⚠️ Unable to reach the AI right now. Please check that the server is running and the Gemini API key is valid, then try again.");

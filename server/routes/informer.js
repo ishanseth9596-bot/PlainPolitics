@@ -2,6 +2,8 @@ import express from "express";
 import { body, validationResult } from "express-validator";
 import Candidate from "../models/Candidate.js";
 import { summariseManifesto, factCheck } from "../services/gemini.js";
+import { successResponse, errorResponse } from "../utils/responseHelper.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
@@ -9,7 +11,7 @@ const router = express.Router();
 const validate = (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(422).json({ errors: errors.array() });
+    errorResponse(res, 422, "VALIDATION_ERROR", "Invalid input", errors.array());
     return false;
   }
   return true;
@@ -18,10 +20,13 @@ const validate = (req, res) => {
 // GET /api/informer/candidates
 router.get("/candidates", async (req, res, next) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return successResponse(res, []); // Return empty list in demo mode
+    }
     const { constituency } = req.query;
     const filter = constituency ? { constituency } : {};
     const candidates = await Candidate.find(filter).select("-__v");
-    res.json(candidates);
+    successResponse(res, candidates);
   } catch (err) {
     next(err);
   }
@@ -30,9 +35,12 @@ router.get("/candidates", async (req, res, next) => {
 // GET /api/informer/candidates/:id
 router.get("/candidates/:id", async (req, res, next) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return errorResponse(res, 503, "DB_DISCONNECTED", "Running in demo mode without database.");
+    }
     const candidate = await Candidate.findById(req.params.id).select("-__v");
-    if (!candidate) return res.status(404).json({ error: "Candidate not found." });
-    res.json(candidate);
+    if (!candidate) return errorResponse(res, 404, "CANDIDATE_NOT_FOUND", "Candidate not found.");
+    successResponse(res, candidate);
   } catch (err) {
     next(err);
   }
@@ -41,10 +49,19 @@ router.get("/candidates/:id", async (req, res, next) => {
 // POST /api/informer/candidates/:id/summarise
 router.post("/candidates/:id/summarise", async (req, res, next) => {
   try {
-    const candidate = await Candidate.findById(req.params.id);
-    if (!candidate) return res.status(404).json({ error: "Candidate not found." });
-    const summary = await summariseManifesto(candidate);
-    res.json({ candidateId: candidate._id, name: candidate.name, summary });
+    let candidate;
+    if (mongoose.connection.readyState === 1) {
+      candidate = await Candidate.findById(req.params.id);
+    }
+    
+    // In demo mode, we might not have a candidate object, but we still want AI to work
+    // if the frontend passes a known demo ID.
+    if (!candidate && !req.params.id.startsWith("demo")) {
+      return errorResponse(res, 404, "CANDIDATE_NOT_FOUND", "Candidate not found.");
+    }
+
+    const summary = await summariseManifesto(candidate || { name: "Demo Candidate", party: "Demo Party", manifesto: [] });
+    successResponse(res, { candidateId: req.params.id, summary });
   } catch (err) {
     next(err);
   }
@@ -57,8 +74,8 @@ router.post(
   async (req, res, next) => {
     if (!validate(req, res)) return;
     try {
-      const result = await factCheck(req.body.claim);
-      res.json({ claim: req.body.claim, result });
+    const result = await factCheck(req.body.claim);
+    successResponse(res, { claim: req.body.claim, result });
     } catch (err) {
       next(err);
     }

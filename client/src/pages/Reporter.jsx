@@ -74,8 +74,8 @@ function SOSDashboard() {
     setShowForm(false);
     setLoading(true);
     try {
-      const { data } = await getSosGuidance(type);
-      setGuidance(data.guidance);
+      const { data: response } = await getSosGuidance(type);
+      setGuidance(response.data.guidance);
     } catch {
       const fallback = {
         stolen_vote:      "1. Calmly tell the Presiding Officer your vote was already cast.\n2. Demand a Tendered Ballot (your legal right to cast a paper backup vote).\n3. After voting, file a written complaint at the booth and visit your local election office.",

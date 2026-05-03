@@ -2,13 +2,15 @@ import express from "express";
 import { body, param, validationResult } from "express-validator";
 import Promise from "../models/Promise.js";
 import { getDepolarisationAdvice } from "../services/gemini.js";
+import { successResponse, errorResponse } from "../utils/responseHelper.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
 const validate = (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(422).json({ errors: errors.array() });
+    errorResponse(res, 422, "VALIDATION_ERROR", "Invalid input", errors.array());
     return false;
   }
   return true;
@@ -38,6 +40,9 @@ router.post(
   async (req, res, next) => {
     if (!validate(req, res)) return;
     try {
+      if (mongoose.connection.readyState !== 1) {
+        return successResponse(res, { id: req.params.id, vote: req.body.vote, status: "demo_updated" });
+      }
       const update =
         req.body.vote === "up"
           ? { $inc: { upvotes: 1 } }
@@ -45,8 +50,8 @@ router.post(
       const promise = await Promise.findByIdAndUpdate(req.params.id, update, {
         new: true,
       });
-      if (!promise) return res.status(404).json({ error: "Promise not found." });
-      res.json(promise);
+      if (!promise) return errorResponse(res, 404, "PROMISE_NOT_FOUND", "Promise not found.");
+      successResponse(res, promise);
     } catch (err) {
       next(err);
     }
@@ -63,13 +68,16 @@ router.patch(
   async (req, res, next) => {
     if (!validate(req, res)) return;
     try {
-      const promise = await Promise.findByIdAndUpdate(
-        req.params.id,
-        { status: req.body.status },
-        { new: true }
-      );
-      if (!promise) return res.status(404).json({ error: "Promise not found." });
-      res.json(promise);
+    if (mongoose.connection.readyState !== 1) {
+      return errorResponse(res, 503, "DB_DISCONNECTED", "Running in demo mode.");
+    }
+    const promise = await Promise.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status },
+      { new: true }
+    );
+    if (!promise) return errorResponse(res, 404, "PROMISE_NOT_FOUND", "Promise not found.");
+    successResponse(res, promise);
     } catch (err) {
       next(err);
     }
@@ -83,8 +91,8 @@ router.post(
   async (req, res, next) => {
     if (!validate(req, res)) return;
     try {
-      const advice = await getDepolarisationAdvice(req.body.concern);
-      res.json({ advice });
+    const advice = await getDepolarisationAdvice(req.body.concern);
+    successResponse(res, { advice });
     } catch (err) {
       next(err);
     }

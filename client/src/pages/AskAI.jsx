@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import Spinner from "../components/Spinner";
+import { askAI } from "../services/api";
 
 export default function AskAI() {
   const [question, setQuestion] = useState("");
@@ -21,9 +22,8 @@ export default function AskAI() {
     setLoading(true);
 
     try {
-      const { askAI: apiAsk } = await import("../services/api");
-      const { data } = await apiAsk(userQ);
-      setMessages((prev) => [...prev, { role: "ai", content: data.answer }]);
+      const { data: response } = await askAI(userQ);
+      setMessages((prev) => [...prev, { role: "ai", content: response.data.answer }]);
     } catch {
       setMessages((prev) => [
         ...prev,

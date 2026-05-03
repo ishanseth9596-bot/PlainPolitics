@@ -5,9 +5,9 @@ FROM node:20-alpine AS client-build
 
 WORKDIR /app/client
 
-# Install deps first (layer caching)
+# Install deps
 COPY client/package*.json ./
-RUN npm ci
+RUN npm install --no-package-lock
 
 # Copy source and build
 COPY client/ ./
@@ -27,7 +27,7 @@ WORKDIR /app
 
 # Install server deps
 COPY server/package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev --no-package-lock
 
 # Copy server source
 COPY server/ ./
