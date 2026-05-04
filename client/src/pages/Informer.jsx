@@ -343,7 +343,7 @@ function VotingGuide() {
       {/* Embedded Video Guide */}
       <div style={{ marginBottom: "var(--space-6)", borderRadius: "var(--radius-lg)", overflow: "hidden", position: "relative", paddingBottom: "56.25%", height: 0, background: "#000" }}>
         <iframe
-          src="https://www.youtube.com/embed/W-A9X9r2m78?rel=0&modestbranding=1"
+          src="https://www.youtube.com/embed/XGJQNKFYqYI?rel=0&modestbranding=1"
           title="Official ECI Voting Procedure"
           allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
@@ -352,7 +352,7 @@ function VotingGuide() {
       </div>
       <div style={{ textAlign: "center", marginBottom: "var(--space-6)" }}>
         <a 
-          href="https://www.youtube.com/watch?v=W-A9X9r2m78" 
+          href="https://www.youtube.com/watch?v=XGJQNKFYqYI" 
           target="_blank" 
           rel="noopener noreferrer"
           style={{ fontSize: "0.85rem", color: "#111", textDecoration: "underline", fontWeight: 600 }}

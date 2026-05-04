@@ -134,7 +134,7 @@ export default function VoterRegistrationHub() {
       {/* Embedded Video Guide (Registration) */}
       <div style={{ marginBottom: "var(--space-6)", borderRadius: "var(--radius-lg)", overflow: "hidden", position: "relative", paddingBottom: "56.25%", height: 0, background: "#000" }}>
         <iframe
-          src="https://www.youtube.com/embed/W-A9X9r2m78"
+          src="https://www.youtube.com/embed/XGJQNKFYqYI"
           title="How to Register to Vote"
           allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen

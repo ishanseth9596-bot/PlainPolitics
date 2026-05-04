@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { SplineScene } from "@/components/ui/splite";
 
 const phases = [
   {
@@ -71,23 +72,34 @@ export default function Home() {
   return (
     <>
       {/* ── Hero ── */}
-      <section className="hero">
-        <div className="container">
-          <span className="phase-badge badge-informer" style={{ marginBottom: "var(--space-4)", display: "inline-flex" }}>🚀 Built for #PromptWars by Hack2skill</span>
-          <h1 className="hero__title">
-            Your Election Journey,<br />
-            <span className="gradient-text">Simplified.</span>
-          </h1>
-          <p className="hero__sub">
-            PlainPolitics guides you through the entire election lifecycle — from registration to accountability — with Gemini AI and real-time civic data.
-          </p>
-          <div className="hero__cta">
-            <Link to="/informer" id="cta-start" className="btn btn-primary">
-              🚀 Start Your Journey
-            </Link>
-            <Link to="/ask-ai" className="btn btn-outline">
-              🤖 Ask AI a Question
-            </Link>
+      <section className="hero" style={{ textAlign: "left", alignItems: "flex-start" }}>
+        <div className="container" style={{ display: "flex", alignItems: "center", gap: "var(--space-6)", flexWrap: "wrap" }}>
+          {/* Left content */}
+          <div style={{ flex: "1", minWidth: "300px" }}>
+            <span className="phase-badge badge-informer" style={{ marginBottom: "var(--space-4)", display: "inline-flex" }}>🚀 Built for #PromptWars by Hack2skill</span>
+            <h1 className="hero__title" style={{ textAlign: "left" }}>
+              Your Election Journey,<br />
+              <span className="gradient-text">Simplified.</span>
+            </h1>
+            <p className="hero__sub" style={{ marginInline: "0", textAlign: "left" }}>
+              PlainPolitics guides you through the entire election lifecycle — from registration to accountability — with Gemini AI and real-time civic data.
+            </p>
+            <div className="hero__cta" style={{ justifyContent: "flex-start" }}>
+              <Link to="/informer" id="cta-start" className="btn btn-primary">
+                🚀 Start Your Journey
+              </Link>
+              <Link to="/ask-ai" className="btn btn-outline">
+                🤖 Ask AI a Question
+              </Link>
+            </div>
+          </div>
+
+          {/* Right content - The Bot */}
+          <div style={{ flex: "1", minWidth: "300px", height: "500px", position: "relative" }}>
+            <SplineScene 
+              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+              className="w-full h-full"
+            />
           </div>
         </div>
       </section>

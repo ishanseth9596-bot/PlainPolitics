@@ -1,3 +1,6 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
 /* ============================================================
    PlainPolitics — Clean Light Minimalist Design System
    Inspired by DemocrAI: white bg, black text, subtle gray borders
